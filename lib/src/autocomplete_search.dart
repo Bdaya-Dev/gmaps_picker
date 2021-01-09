@@ -220,8 +220,9 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
         left: screenWidth * 0.025,
         right: screenWidth * 0.025,
         child: Material(
-          elevation: 4.0,
+          elevation: 3,
           child: overlayChild,
+          borderRadius: BorderRadius.circular(8),
         ),
       ),
     );
@@ -254,9 +255,12 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   Widget _buildPredictionOverlay(List<Prediction> predictions) {
     return ListBody(
       children: predictions
+          .asMap()
+          .entries
           .map(
-            (p) => PredictionTile(
-              prediction: p,
+            (pred) => PredictionTile(
+              key: Key(pred.key.toString()),
+              prediction: pred.value,
               onTap: (selectedPrediction) {
                 resetSearchBar();
                 widget.onPicked(selectedPrediction);

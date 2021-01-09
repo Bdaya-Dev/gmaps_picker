@@ -31,8 +31,6 @@ class PlacePicker extends StatefulWidget {
     this.onMapCreated,
     this.hintText,
     this.searchingText,
-    // this.searchBarHeight,
-    // this.contentPadding,
     this.onAutoCompleteFailed,
     this.onGeocodingSearchFailed,
     this.proxyBaseUrl,
@@ -75,8 +73,6 @@ class PlacePicker extends StatefulWidget {
 
   final String hintText;
   final String searchingText;
-  // final double searchBarHeight;
-  // final EdgeInsetsGeometry contentPadding;
 
   final ValueChanged<String> onAutoCompleteFailed;
   final ValueChanged<String> onGeocodingSearchFailed;

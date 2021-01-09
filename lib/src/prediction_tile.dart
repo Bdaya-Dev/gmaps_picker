@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_webservice/places.dart';
 
 class PredictionTile extends StatelessWidget {
+  const PredictionTile({Key key, @required this.prediction, this.onTap})
+      : super(key: key);
+
   final Prediction prediction;
   final ValueChanged<Prediction> onTap;
-
-  PredictionTile({@required this.prediction, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +18,7 @@ class PredictionTile extends StatelessWidget {
         ),
       ),
       onTap: () {
-        if (onTap != null) {
-          onTap(prediction);
-        }
+        onTap?.call(prediction);
       },
     );
   }
