@@ -315,19 +315,17 @@ class _PlacePickerState extends State<PlacePicker> {
     );
   }
 
-  _pickPrediction(Prediction prediction) async {
+  Future<void> _pickPrediction(Prediction prediction) async {
     provider.placeSearchingState = SearchingState.Searching;
 
-    final PlacesDetailsResponse response =
-        await provider.places.getDetailsByPlaceId(
+    final response = await provider.places.getDetailsByPlaceId(
       prediction.placeId,
       sessionToken: provider.sessionToken,
       language: widget.autocompleteLanguage,
     );
 
     if (response.errorMessage?.isNotEmpty == true ||
-        response.status == "REQUEST_DENIED") {
-      print("AutoCompleteSearch Error: " + response.errorMessage);
+        response.status == 'REQUEST_DENIED') {
       if (widget.onAutoCompleteFailed != null) {
         widget.onAutoCompleteFailed(response.status);
       }
@@ -345,8 +343,8 @@ class _PlacePickerState extends State<PlacePicker> {
     provider.placeSearchingState = SearchingState.Idle;
   }
 
-  _moveTo(double latitude, double longitude) async {
-    GoogleMapController controller = provider.mapController;
+  Future<void> _moveTo(double latitude, double longitude) async {
+    final controller = provider.mapController;
     if (controller == null) return;
 
     await controller.animateCamera(
@@ -359,7 +357,7 @@ class _PlacePickerState extends State<PlacePicker> {
     );
   }
 
-  _moveToCurrentPosition() async {
+  Future<void> _moveToCurrentPosition() async {
     if (provider.currentPosition != null) {
       await _moveTo(provider.currentPosition.latitude,
           provider.currentPosition.longitude);
