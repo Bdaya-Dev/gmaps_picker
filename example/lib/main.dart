@@ -38,25 +38,21 @@ class _HomePageState extends State<HomePage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => _buildPlacePicker(),
+                builder: (context) => PlacePicker(
+                  apiKey: apiKey,
+                  initialPosition: LatLng(-33.8567844, 151.213108),
+                  useCurrentLocation: true,
+                  selectInitialPosition: true,
+                  onPlacePicked: (result) {
+                    print('You picked: ${result.formattedAddress}');
+                    Navigator.of(context).pop();
+                  },
+                ),
               ),
             );
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildPlacePicker() {
-    return PlacePicker(
-      apiKey: apiKey,
-      initialPosition: LatLng(-33.8567844, 151.213108),
-      useCurrentLocation: true,
-      selectInitialPosition: true,
-      onPlacePicked: (result) {
-        print('You picked: ${result.formattedAddress}');
-        Navigator.of(context).pop();
-      },
     );
   }
 }
