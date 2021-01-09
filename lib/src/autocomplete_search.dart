@@ -19,7 +19,6 @@ class AutoCompleteSearch extends StatefulWidget {
       this.hintText,
       this.searchingText = 'Searching...',
       this.height = 40,
-      this.contentPadding = EdgeInsets.zero,
       this.debounceMilliseconds,
       this.onSearchFailed,
       this.autocompleteOffset,
@@ -39,7 +38,6 @@ class AutoCompleteSearch extends StatefulWidget {
   final String hintText;
   final String searchingText;
   final double height;
-  final EdgeInsetsGeometry contentPadding;
   final int debounceMilliseconds;
   final ValueChanged<Prediction> onPicked;
   final ValueChanged<String> onSearchFailed;
@@ -98,60 +96,41 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: provider,
-      child: Card(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Colors.black54
-            : Colors.white,
-        elevation: 8.0,
-        child: Row(
-          children: <Widget>[
-            SizedBox(width: 10),
-            Icon(Icons.search),
-            SizedBox(width: 10),
-            Expanded(child: _buildSearchTextField()),
-            _buildTextClearIcon(),
-          ],
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16),
+        alignment: Alignment.center,
+        child: Material(
+          elevation: 3,
+          borderRadius: BorderRadius.circular(4),
+          child: TextField(
+            controller: controller,
+            focusNode: focus,
+            decoration: InputDecoration(
+              hintText: widget.hintText,
+              isDense: true,
+              contentPadding: EdgeInsets.symmetric(vertical: 12),
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              prefixIcon: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: Icon(Icons.search, size: 24),
+              ),
+              prefixIconConstraints: BoxConstraints.loose(Size.fromHeight(32)),
+              suffix: provider.searchTerm.isNotEmpty
+                  ? GestureDetector(
+                      child: Icon(Icons.clear),
+                      onTap: clearText,
+                    )
+                  : null,
+              fillColor: Colors.white,
+              filled: true,
+            ),
+          ),
         ),
       ),
     );
-  }
-
-  Widget _buildSearchTextField() {
-    return TextField(
-      controller: controller,
-      focusNode: focus,
-      decoration: InputDecoration(
-        hintText: widget.hintText,
-        border: InputBorder.none,
-        isDense: true,
-        contentPadding: widget.contentPadding,
-      ),
-    );
-  }
-
-  Widget _buildTextClearIcon() {
-    return Selector<SearchProvider, String>(
-        selector: (_, provider) => provider.searchTerm,
-        builder: (_, data, __) {
-          if (data.isNotEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: GestureDetector(
-                child: Icon(
-                  Icons.clear,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white
-                      : Colors.black,
-                ),
-                onTap: () {
-                  clearText();
-                },
-              ),
-            );
-          } else {
-            return SizedBox(width: 10);
-          }
-        });
   }
 
   void _onSearchInputChange() {

@@ -280,7 +280,8 @@ class _PlacePickerState extends State<PlacePicker> {
                 icon: Icon(
                   Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
                 ),
-                padding: EdgeInsets.zero)
+                padding: EdgeInsets.zero,
+              )
             : SizedBox(width: 15),
         Expanded(
           child: AutoCompleteSearch(
