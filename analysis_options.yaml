@@ -1,0 +1,3 @@
+# Enable pedantic linting.
+# Used within google: https://github.com/google/pedantic.
+include: package:pedantic/analysis_options.yaml
