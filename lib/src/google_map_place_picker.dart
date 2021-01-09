@@ -1,15 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-
+import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker/providers/place_provider.dart';
 import 'package:google_maps_place_picker/src/components/animated_pin.dart';
-import 'package:google_maps_place_picker/src/components/floating_card.dart';
 import 'package:google_maps_place_picker/src/place_picker.dart';
 import 'package:google_maps_webservice/geocoding.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -273,7 +270,12 @@ class GoogleMapPlacePicker extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 AnimatedPin(
-                    child: Icon(Icons.place, size: 36, color: Colors.red)),
+                  child: Icon(
+                    Icons.place,
+                    size: 36,
+                    color: Colors.red,
+                  ),
+                ),
                 SizedBox(height: 42),
               ],
             ),
@@ -321,18 +323,22 @@ class GoogleMapPlacePicker extends StatelessWidget {
   }
 
   Widget _defaultPlaceWidgetBuilder(
-      BuildContext context, PickResult data, SearchingState state) {
-    return FloatingCard(
-      bottomPosition: MediaQuery.of(context).size.height * 0.05,
-      leftPosition: MediaQuery.of(context).size.width * 0.025,
-      rightPosition: MediaQuery.of(context).size.width * 0.025,
-      width: MediaQuery.of(context).size.width * 0.9,
-      borderRadius: BorderRadius.circular(12.0),
-      elevation: 4.0,
-      color: Theme.of(context).cardColor,
-      child: state == SearchingState.Searching
-          ? _buildLoadingIndicator()
-          : _buildSelectionDetails(context, data),
+    BuildContext context,
+    PickResult data,
+    SearchingState state,
+  ) {
+    final size = MediaQuery.of(context).size;
+
+    return Positioned(
+      bottom: size.height * 0.05,
+      left: size.width * 0.025,
+      right: size.width * 0.025,
+      child: Card(
+        elevation: 4,
+        child: state == SearchingState.Searching
+            ? _buildLoadingIndicator()
+            : _buildSelectionDetails(context, data),
+      ),
     );
   }
 
@@ -360,14 +366,10 @@ class GoogleMapPlacePicker extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
-          RaisedButton(
-            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          ElevatedButton(
             child: Text(
               'Select here',
               style: TextStyle(fontSize: 16),
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4.0),
             ),
             onPressed: () {
               onPlacePicked(result);
@@ -396,7 +398,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
                     fillColor: Theme.of(context).brightness == Brightness.dark
                         ? Colors.black54
                         : Colors.white,
-                    elevation: 8.0,
+                    elevation: 8,
                     onPressed: onToggleMapType,
                     child: Icon(Icons.layers),
                   ),
@@ -412,7 +414,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
                     fillColor: Theme.of(context).brightness == Brightness.dark
                         ? Colors.black54
                         : Colors.white,
-                    elevation: 8.0,
+                    elevation: 8,
                     onPressed: onMyLocation,
                     child: Icon(Icons.my_location),
                   ),

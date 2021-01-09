@@ -5,7 +5,6 @@ import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker/providers/place_provider.dart';
 import 'package:google_maps_place_picker/providers/search_provider.dart';
 import 'package:google_maps_place_picker/src/components/prediction_tile.dart';
-import 'package:google_maps_place_picker/src/components/rounded_frame.dart';
 import 'package:google_maps_place_picker/src/controllers/autocomplete_search_controller.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:provider/provider.dart';
@@ -99,13 +98,10 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: provider,
-      child: RoundedFrame(
-        height: widget.height,
-        padding: const EdgeInsets.only(right: 10),
+      child: Card(
         color: Theme.of(context).brightness == Brightness.dark
             ? Colors.black54
             : Colors.white,
-        borderRadius: BorderRadius.circular(20),
         elevation: 8.0,
         child: Row(
           children: <Widget>[
