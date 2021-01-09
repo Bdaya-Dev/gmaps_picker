@@ -1,19 +1,21 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_api_headers/google_api_headers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
-import 'package:google_maps_place_picker/providers/place_provider.dart';
 import 'package:google_maps_place_picker/src/autocomplete_search.dart';
-import 'package:google_maps_place_picker/src/controllers/autocomplete_search_controller.dart';
+import 'package:google_maps_place_picker/src/autocomplete_search_controller.dart';
 import 'package:google_maps_place_picker/src/google_map_place_picker.dart';
-import 'package:google_maps_place_picker/src/utils/uuid.dart';
+import 'package:google_maps_place_picker/src/place_provider.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:http/http.dart';
 import 'package:provider/provider.dart';
-import 'dart:io' show Platform;
+import 'package:uuid/uuid.dart';
+
+final _uuid = Uuid();
 
 enum PinState { Preparing, Idle, Dragging }
 enum SearchingState { Idle, Searching }
@@ -198,7 +200,7 @@ class _PlacePickerState extends State<PlacePicker> {
       widget.httpClient,
       headers,
     );
-    provider.sessionToken = Uuid().generateV4();
+    provider.sessionToken = _uuid.v4();
     provider.desiredAccuracy = widget.desiredLocationAccuracy;
     provider.setMapType(widget.initialMapType);
 
