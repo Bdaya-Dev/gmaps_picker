@@ -156,6 +156,7 @@ class GoogleMapPlacePicker extends StatelessWidget {
             initialCameraPosition: initialCameraPosition,
             mapType: data,
             myLocationEnabled: true,
+            zoomControlsEnabled: false,
             onMapCreated: (GoogleMapController controller) {
               provider.mapController = controller;
               provider.setCameraPosition(null);
