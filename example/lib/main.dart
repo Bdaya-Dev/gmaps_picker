@@ -20,8 +20,6 @@ class MyApp extends StatelessWidget {
 class HomePage extends StatefulWidget {
   const HomePage({Key key}) : super(key: key);
 
-  static final kInitialPosition = LatLng(-33.8567844, 151.213108);
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -31,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Google Map Place Picer Demo'),
+        title: Text('Google Map Place Picker Demo'),
       ),
       body: Center(
         child: ElevatedButton(
@@ -52,7 +50,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildPlacePicker() {
     return PlacePicker(
       apiKey: apiKey,
-      initialPosition: HomePage.kInitialPosition,
+      initialPosition: LatLng(-33.8567844, 151.213108),
       useCurrentLocation: true,
       selectInitialPosition: true,
       onPlacePicked: (result) {
