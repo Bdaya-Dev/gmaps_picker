@@ -94,7 +94,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: EdgeInsets.only(left: 16, right: 8),
       alignment: Alignment.center,
       child: Material(
         elevation: 3,
