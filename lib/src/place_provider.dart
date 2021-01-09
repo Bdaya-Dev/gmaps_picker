@@ -76,13 +76,13 @@ class PlaceProvider extends ChangeNotifier {
 
   CameraPosition _previousCameraPosition;
   CameraPosition get prevCameraPosition => _previousCameraPosition;
-  setPrevCameraPosition(CameraPosition prePosition) {
+  void setPrevCameraPosition(CameraPosition prePosition) {
     _previousCameraPosition = prePosition;
   }
 
   CameraPosition _currentCameraPosition;
   CameraPosition get cameraPosition => _currentCameraPosition;
-  setCameraPosition(CameraPosition newPosition) {
+  void setCameraPosition(CameraPosition newPosition) {
     _currentCameraPosition = newPosition;
   }
 
@@ -123,14 +123,18 @@ class PlaceProvider extends ChangeNotifier {
 
   MapType _mapType = MapType.normal;
   MapType get mapType => _mapType;
-  setMapType(MapType mapType, {bool notify = false}) {
+  void setMapType(MapType mapType, {bool notify = false}) {
     _mapType = mapType;
-    if (notify) notifyListeners();
+    if (notify) {
+      notifyListeners();
+    }
   }
 
-  switchMapType() {
+  void switchMapType() {
     _mapType = MapType.values[(_mapType.index + 1) % MapType.values.length];
-    if (_mapType == MapType.none) _mapType = MapType.normal;
+    if (_mapType == MapType.none) {
+      _mapType = MapType.normal;
+    }
 
     notifyListeners();
   }
