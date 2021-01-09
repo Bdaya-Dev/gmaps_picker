@@ -115,12 +115,20 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
               child: Icon(Icons.search, size: 24),
             ),
             prefixIconConstraints: BoxConstraints.loose(Size.fromHeight(32)),
-            suffix: _searchTerm.isNotEmpty
-                ? GestureDetector(
-                    child: Icon(Icons.clear),
-                    onTap: clearText,
+            suffixIcon: _searchTerm.isNotEmpty
+                ? Container(
+                    margin: EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      child: Icon(
+                        Icons.clear,
+                        size: 24,
+                        color: Colors.black,
+                      ),
+                      onTap: clearText,
+                    ),
                   )
                 : null,
+            suffixIconConstraints: BoxConstraints.loose(Size.fromHeight(32)),
             fillColor: Colors.white,
             filled: true,
           ),
