@@ -3,35 +3,33 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:google_maps_place_picker/providers/place_provider.dart';
-import 'package:google_maps_place_picker/providers/search_provider.dart';
 import 'package:google_maps_place_picker/src/components/prediction_tile.dart';
 import 'package:google_maps_place_picker/src/controllers/autocomplete_search_controller.dart';
 import 'package:google_maps_webservice/places.dart';
-import 'package:provider/provider.dart';
 
 class AutoCompleteSearch extends StatefulWidget {
-  const AutoCompleteSearch(
-      {Key key,
-      @required this.sessionToken,
-      @required this.onPicked,
-      @required this.appBarKey,
-      @required this.searchBarController,
-      this.hintText,
-      this.searchingText = 'Searching...',
-      this.height = 40,
-      this.debounceMilliseconds,
-      this.onSearchFailed,
-      this.autocompleteOffset,
-      this.autocompleteRadius,
-      this.autocompleteLanguage,
-      this.autocompleteComponents,
-      this.autocompleteTypes,
-      this.strictbounds,
-      this.region,
-      this.initialSearchString,
-      this.searchForInitialValue,
-      this.autocompleteOnTrailingWhitespace})
-      : assert(searchBarController != null),
+  const AutoCompleteSearch({
+    Key key,
+    @required this.sessionToken,
+    @required this.onPicked,
+    @required this.appBarKey,
+    @required this.searchBarController,
+    this.hintText,
+    this.searchingText = 'Searching...',
+    this.height = 40,
+    this.debounceMilliseconds,
+    this.onSearchFailed,
+    this.autocompleteOffset,
+    this.autocompleteRadius,
+    this.autocompleteLanguage,
+    this.autocompleteComponents,
+    this.autocompleteTypes,
+    this.strictbounds,
+    this.region,
+    this.initialSearchString,
+    this.searchForInitialValue,
+    this.autocompleteOnTrailingWhitespace,
+  })  : assert(searchBarController != null),
         super(key: key);
 
   final String sessionToken;
@@ -62,7 +60,8 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   TextEditingController controller = TextEditingController();
   FocusNode focus = FocusNode();
   OverlayEntry overlayEntry;
-  SearchProvider provider = SearchProvider();
+  String _searchTerm = '';
+  String _previousSearchTerm = '';
 
   @override
   void initState() {
@@ -94,39 +93,36 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: provider,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16),
-        alignment: Alignment.center,
-        child: Material(
-          elevation: 3,
-          borderRadius: BorderRadius.circular(4),
-          child: TextField(
-            controller: controller,
-            focusNode: focus,
-            decoration: InputDecoration(
-              hintText: widget.hintText,
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(vertical: 12),
-              border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              prefixIcon: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Icon(Icons.search, size: 24),
-              ),
-              prefixIconConstraints: BoxConstraints.loose(Size.fromHeight(32)),
-              suffix: provider.searchTerm.isNotEmpty
-                  ? GestureDetector(
-                      child: Icon(Icons.clear),
-                      onTap: clearText,
-                    )
-                  : null,
-              fillColor: Colors.white,
-              filled: true,
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      alignment: Alignment.center,
+      child: Material(
+        elevation: 3,
+        borderRadius: BorderRadius.circular(4),
+        child: TextField(
+          controller: controller,
+          focusNode: focus,
+          decoration: InputDecoration(
+            hintText: widget.hintText,
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(vertical: 12),
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(4),
             ),
+            prefixIcon: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: Icon(Icons.search, size: 24),
+            ),
+            prefixIconConstraints: BoxConstraints.loose(Size.fromHeight(32)),
+            suffix: _searchTerm.isNotEmpty
+                ? GestureDetector(
+                    child: Icon(Icons.clear),
+                    onTap: clearText,
+                  )
+                : null,
+            fillColor: Colors.white,
+            filled: true,
           ),
         ),
       ),
@@ -134,8 +130,12 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   }
 
   void _onSearchInputChange() {
-    if (!mounted) return;
-    this.provider.searchTerm = controller.text;
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _searchTerm = controller.text;
+    });
 
     final provider = PlaceProvider.of(context, listen: false);
 
@@ -145,7 +145,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
       return;
     }
 
-    if (controller.text.trim() == this.provider.prevSearchTerm.trim()) {
+    if (controller.text.trim() == _previousSearchTerm.trim()) {
       provider.debounceTimer?.cancel();
       return;
     }
@@ -174,7 +174,9 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   }
 
   void _searchPlace(String searchTerm) {
-    provider.prevSearchTerm = searchTerm;
+    setState(() {
+      _previousSearchTerm = searchTerm;
+    });
 
     if (context == null) {
       return;
@@ -290,7 +292,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   }
 
   void clearText() {
-    provider.searchTerm = '';
+    _searchTerm = '';
     controller.clear();
   }
 
