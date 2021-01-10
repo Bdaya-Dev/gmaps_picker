@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
                 builder: (context) => GMapsPicker(
                   initialLocation: LatLng(-33.8567844, 151.213108),
                   onPlacePicked: (result) {
-                    print('You picked: ${result.formattedAddress}');
+                    print('You picked: ${result.address}');
                     Navigator.of(context).pop();
                   },
                 ),

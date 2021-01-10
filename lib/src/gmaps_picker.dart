@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gmaps_picker/gmaps_picker.dart';
 import 'package:gmaps_picker/src/animated_pin.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -11,7 +10,7 @@ class GMapsPicker extends StatefulWidget {
     this.onPlacePicked,
   }) : super(key: key);
 
-  final ValueChanged<PickResult> onPlacePicked;
+  final ValueChanged<Location> onPlacePicked;
   final LatLng initialLocation;
 
   @override
@@ -19,7 +18,7 @@ class GMapsPicker extends StatefulWidget {
 }
 
 class _GMapsPickerState extends State<GMapsPicker> {
-  PickResult _pickResult;
+  Location _locationPick;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
       children: <Widget>[
         _buildGoogleMap(context),
         AnimatedPin(isAnimating: false),
-        _buildFloatingCard(),
+        if (_locationPick != null) _buildFloatingCard(),
         _buildMyLocationButton(context),
       ],
     );
@@ -58,32 +57,28 @@ class _GMapsPickerState extends State<GMapsPicker> {
       right: size.width * 0.025,
       child: Card(
         elevation: 4,
-        child: _buildSelectionDetails(context, _pickResult),
-      ),
-    );
-  }
-
-  Widget _buildSelectionDetails(BuildContext context, PickResult result) {
-    return Container(
-      margin: EdgeInsets.all(10),
-      child: Column(
-        children: <Widget>[
-          Text(
-            result.formattedAddress,
-            style: TextStyle(fontSize: 18),
-            textAlign: TextAlign.center,
+        child: Container(
+          margin: EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              Text(
+                _locationPick.address,
+                style: TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                child: Text(
+                  'Select here',
+                  style: TextStyle(fontSize: 16),
+                ),
+                onPressed: () {
+                  widget.onPlacePicked(_locationPick);
+                },
+              ),
+            ],
           ),
-          SizedBox(height: 10),
-          ElevatedButton(
-            child: Text(
-              'Select here',
-              style: TextStyle(fontSize: 16),
-            ),
-            onPressed: () {
-              widget.onPlacePicked(result);
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -109,4 +104,15 @@ class _GMapsPickerState extends State<GMapsPicker> {
       ),
     );
   }
+}
+
+/// A location that was picked from google maps.
+class Location {
+  Location({
+    @required this.address,
+    @required this.latlng,
+  });
+
+  final String address;
+  final LatLng latlng;
 }
