@@ -96,19 +96,22 @@ class _GMapsPickerState extends State<GMapsPicker> {
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Positioned(
-      top: statusBarHeight + 16,
-      right: 15,
-      child: Container(
-        width: 35,
-        height: 35,
-        child: RawMaterialButton(
-          shape: CircleBorder(),
-          fillColor: Theme.of(context).brightness == Brightness.dark
-              ? Colors.black54
-              : Colors.white,
-          elevation: 8,
-          onPressed: null,
-          child: Icon(Icons.my_location),
+      top: statusBarHeight + kToolbarHeight + 16,
+      right: 12,
+      child: ElevatedButton(
+        onPressed: () {},
+        child: Icon(Icons.my_location),
+        style: ButtonStyle(
+          minimumSize: MaterialStateProperty.all(Size.zero),
+          padding: MaterialStateProperty.all(
+            EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          ),
+          shape: MaterialStateProperty.all(RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32),
+          )),
+          backgroundColor: MaterialStateProperty.all(Colors.white),
+          foregroundColor: MaterialStateProperty.all(Colors.black),
+          overlayColor: MaterialStateProperty.all(Colors.grey.shade200),
         ),
       ),
     );
