@@ -7,7 +7,6 @@ import 'package:google_api_headers/google_api_headers.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gmaps_picker/gmaps_picker.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
-import 'package:gmaps_picker/src/autocomplete_search_controller.dart';
 import 'package:gmaps_picker/src/google_map_place_picker.dart';
 import 'package:gmaps_picker/src/place_provider.dart';
 import 'package:google_maps_webservice/places.dart';
@@ -169,23 +168,16 @@ class PlacePicker extends StatefulWidget {
 }
 
 class _PlacePickerState extends State<PlacePicker> {
-  GlobalKey appBarKey = GlobalKey();
+  final appBarKey = GlobalKey();
+  final _autocompleteKey = GlobalKey<AutoCompleteSearchState>();
   Future<PlaceProvider> _futureProvider;
   PlaceProvider provider;
-  SearchBarController searchBarController = SearchBarController();
 
   @override
   void initState() {
     super.initState();
 
     _futureProvider = _initPlaceProvider();
-  }
-
-  @override
-  void dispose() {
-    searchBarController.dispose();
-
-    super.dispose();
   }
 
   Future<PlaceProvider> _initPlaceProvider() async {
@@ -207,7 +199,7 @@ class _PlacePickerState extends State<PlacePicker> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () {
-        searchBarController.clearOverlay();
+        _autocompleteKey.currentState.clearOverlay();
         return Future.value(true);
       },
       child: FutureBuilder(
@@ -283,8 +275,8 @@ class _PlacePickerState extends State<PlacePicker> {
             : SizedBox(width: 15),
         Expanded(
           child: AutoCompleteSearch(
+              key: _autocompleteKey,
               appBarKey: appBarKey,
-              searchBarController: searchBarController,
               sessionToken: provider.sessionToken,
               hintText: widget.hintText,
               searchingText: widget.searchingText,
@@ -427,7 +419,7 @@ class _PlacePickerState extends State<PlacePicker> {
         }
       },
       onMoveStart: () {
-        searchBarController.reset();
+        _autocompleteKey.currentState.resetSearchBar();
       },
       onPlacePicked: widget.onPlacePicked,
     );

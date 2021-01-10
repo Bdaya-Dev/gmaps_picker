@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:gmaps_picker/gmaps_picker.dart';
 import 'package:gmaps_picker/src/place_provider.dart';
 import 'package:gmaps_picker/src/prediction_tile.dart';
-import 'package:gmaps_picker/src/autocomplete_search_controller.dart';
 import 'package:google_maps_webservice/places.dart';
 
 class AutoCompleteSearch extends StatefulWidget {
@@ -13,7 +12,6 @@ class AutoCompleteSearch extends StatefulWidget {
     @required this.sessionToken,
     @required this.onPicked,
     @required this.appBarKey,
-    @required this.searchBarController,
     this.hintText,
     this.searchingText = 'Searching...',
     this.height = 40,
@@ -29,8 +27,7 @@ class AutoCompleteSearch extends StatefulWidget {
     this.initialSearchString,
     this.searchForInitialValue,
     this.autocompleteOnTrailingWhitespace,
-  })  : assert(searchBarController != null),
-        super(key: key);
+  }) : super(key: key);
 
   final String sessionToken;
   final String hintText;
@@ -39,7 +36,6 @@ class AutoCompleteSearch extends StatefulWidget {
   final int debounceMilliseconds;
   final ValueChanged<Prediction> onPicked;
   final ValueChanged<String> onSearchFailed;
-  final SearchBarController searchBarController;
   final num autocompleteOffset;
   final num autocompleteRadius;
   final String autocompleteLanguage;
@@ -76,8 +72,6 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
     }
     controller.addListener(_onSearchInputChange);
     focus.addListener(_onFocusChanged);
-
-    widget.searchBarController.attach(this);
   }
 
   @override
