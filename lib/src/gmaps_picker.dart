@@ -51,7 +51,12 @@ class _GMapsPickerState extends State<GMapsPicker> {
       mapType: MapType.normal,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
-      onMapCreated: (GoogleMapController controller) {},
+      onMapCreated: (GoogleMapController controller) {
+        // Zoom to a level where map is discernable with respect to a city.
+        controller.animateCamera(
+          CameraUpdate.newLatLngZoom(widget.initialLocation, 15),
+        );
+      },
       onCameraIdle: () {},
       onCameraMoveStarted: () {},
       onCameraMove: (CameraPosition position) {},
