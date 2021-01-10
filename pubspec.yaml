@@ -1,7 +1,7 @@
-name: google_maps_place_picker
+name: gmaps_picker
 description: A flutter widget to pick a location from Google Map.
 version: 1.0.1
-homepage: https://github.com/pepsighan/google_maps_place_picker
+homepage: https://github.com/pepsighan/gmaps_picker
 
 environment:
   sdk: ">=2.10.0 <3.0.0"

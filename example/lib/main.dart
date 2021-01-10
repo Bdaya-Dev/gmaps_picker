@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:gmaps_picker/gmaps_picker.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const apiKey = 'put-your-api-key-here';
