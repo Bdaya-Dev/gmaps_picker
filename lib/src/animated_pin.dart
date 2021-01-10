@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AnimatedPin extends StatefulWidget {
-  AnimatedPin({
-    Key key,
-    this.child,
-  });
+  AnimatedPin({Key key, @required this.isAnimating});
 
-  final Widget child;
+  final bool isAnimating;
 
   @override
   _AnimatedPinState createState() => _AnimatedPinState();
@@ -26,6 +23,21 @@ class _AnimatedPinState extends State<AnimatedPin>
   }
 
   @override
+  void didUpdateWidget(covariant AnimatedPin oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Start the animation if isAnimating is now true.
+    if (widget.isAnimating && !oldWidget.isAnimating) {
+      _controller.forward();
+    }
+
+    // Stop the animation if isAnimating is now false.
+    if (!widget.isAnimating && oldWidget.isAnimating) {
+      _controller.stop();
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
@@ -33,20 +45,26 @@ class _AnimatedPinState extends State<AnimatedPin>
 
   @override
   Widget build(BuildContext context) {
-    return JumpingContainer(controller: _controller, child: widget.child);
+    return JumpingContainer(
+      controller: _controller,
+      child: Icon(
+        Icons.place,
+        size: 36,
+        color: Colors.red,
+      ),
+    );
   }
 }
 
 class JumpingContainer extends AnimatedWidget {
   const JumpingContainer({
     Key key,
-    AnimationController controller,
-    this.child,
+    @required AnimationController controller,
+    @required this.child,
   }) : super(key: key, listenable: controller);
 
-  final Widget child;
-
   Animation<double> get _progress => listenable;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

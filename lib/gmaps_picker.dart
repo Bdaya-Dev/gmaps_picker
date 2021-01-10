@@ -1,4 +1,4 @@
 library gmaps_picker;
 
 export 'src/pick_result.dart';
-export 'src/place_picker.dart';
+export 'src/gmaps_picker.dart';
