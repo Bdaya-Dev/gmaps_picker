@@ -17,9 +17,9 @@ class _AnimatedPinState extends State<AnimatedPin>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 1),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
-    )..repeat();
+    );
   }
 
   @override
@@ -33,7 +33,7 @@ class _AnimatedPinState extends State<AnimatedPin>
 
     // Stop the animation if isAnimating is now false.
     if (!widget.isAnimating && oldWidget.isAnimating) {
-      _controller.stop();
+      _controller.reverse();
     }
   }
 
@@ -45,7 +45,7 @@ class _AnimatedPinState extends State<AnimatedPin>
 
   @override
   Widget build(BuildContext context) {
-    return JumpingContainer(
+    return RaisingAnimation(
       controller: _controller,
       child: Icon(
         Icons.place,
@@ -56,8 +56,8 @@ class _AnimatedPinState extends State<AnimatedPin>
   }
 }
 
-class JumpingContainer extends AnimatedWidget {
-  const JumpingContainer({
+class RaisingAnimation extends AnimatedWidget {
+  const RaisingAnimation({
     Key key,
     @required AnimationController controller,
     @required this.child,
@@ -69,7 +69,7 @@ class JumpingContainer extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: Offset(0, -10 + _progress.value * 10),
+      offset: Offset(0, -10 + _progress.value * -10),
       child: child,
     );
   }

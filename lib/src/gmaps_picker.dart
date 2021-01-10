@@ -23,6 +23,8 @@ class GMapsPicker extends StatefulWidget {
 
 class _GMapsPickerState extends State<GMapsPicker> {
   Location _locationPick;
+  LatLng _currentMarker;
+  bool _isMoving = false;
 
   /// Get the current position of the user.
   Future<Position> _getCurrentLocation() async {
@@ -61,7 +63,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
       body: Stack(
         children: <Widget>[
           _buildGoogleMap(context),
-          AnimatedPin(isAnimating: false),
+          Center(child: AnimatedPin(isAnimating: _isMoving)),
           if (_locationPick != null) _buildFloatingCard(),
           _buildMyLocationButton(context),
         ],
@@ -81,17 +83,27 @@ class _GMapsPickerState extends State<GMapsPicker> {
       zoomControlsEnabled: false,
       onMapCreated: (GoogleMapController controller) async {
         final currentPosition = await _getCurrentLocation();
+        _currentMarker =
+            LatLng(currentPosition.latitude, currentPosition.longitude);
 
         // Move the map to the current location of the user. Also, zoom to a
         // level where the map is discernable with respect to a city
-        await controller.animateCamera(CameraUpdate.newLatLngZoom(
-          LatLng(currentPosition.latitude, currentPosition.longitude),
-          15,
-        ));
+        await controller
+            .animateCamera(CameraUpdate.newLatLngZoom(_currentMarker, 15));
       },
-      onCameraIdle: () {},
-      onCameraMoveStarted: () {},
-      onCameraMove: (CameraPosition position) {},
+      onCameraMove: (CameraPosition position) {
+        _currentMarker = position.target;
+      },
+      onCameraMoveStarted: () {
+        setState(() {
+          _isMoving = true;
+        });
+      },
+      onCameraIdle: () {
+        setState(() {
+          _isMoving = false;
+        });
+      },
     );
   }
 
