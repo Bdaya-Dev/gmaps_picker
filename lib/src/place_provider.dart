@@ -14,23 +14,10 @@ import 'package:provider/provider.dart';
 class PlaceProvider extends ChangeNotifier {
   PlaceProvider(
     String apiKey,
-    String proxyBaseUrl,
-    Client httpClient,
     Map<String, dynamic> apiHeaders,
   ) {
-    places = GoogleMapsPlaces(
-      apiKey: apiKey,
-      baseUrl: proxyBaseUrl,
-      httpClient: httpClient,
-      apiHeaders: apiHeaders,
-    );
-
-    geocoding = GoogleMapsGeocoding(
-      apiKey: apiKey,
-      baseUrl: proxyBaseUrl,
-      httpClient: httpClient,
-      apiHeaders: apiHeaders,
-    );
+    places = GoogleMapsPlaces(apiKey: apiKey, apiHeaders: apiHeaders);
+    geocoding = GoogleMapsGeocoding(apiKey: apiKey, apiHeaders: apiHeaders);
   }
 
   static PlaceProvider of(BuildContext context, {bool listen = true}) =>
@@ -43,7 +30,7 @@ class PlaceProvider extends ChangeNotifier {
   LocationAccuracy desiredAccuracy;
   bool isAutoCompleteSearching = false;
 
-  Future<void> updateCurrentLocation(bool forceAndroidLocationManager) async {
+  Future<void> updateCurrentLocation() async {
     final status = await Permission.location.request();
     if (status.isGranted) {
       currentPosition = await getCurrentPosition(

@@ -3,14 +3,13 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_api_headers/google_api_headers.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gmaps_picker/gmaps_picker.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
 import 'package:gmaps_picker/src/google_map_place_picker.dart';
 import 'package:gmaps_picker/src/place_provider.dart';
+import 'package:google_api_headers/google_api_headers.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -32,10 +31,6 @@ class PlacePicker extends StatefulWidget {
     this.searchingText,
     this.onAutoCompleteFailed,
     this.onGeocodingSearchFailed,
-    this.proxyBaseUrl,
-    this.httpClient,
-    this.selectedPlaceWidgetBuilder,
-    this.pinBuilder,
     this.autoCompleteDebounceInMilliseconds = 500,
     this.cameraMoveDebounceInMilliseconds = 750,
     this.initialMapType = MapType.normal,
@@ -51,14 +46,6 @@ class PlacePicker extends StatefulWidget {
     this.autocompleteTypes,
     this.strictbounds,
     this.region,
-    this.selectInitialPosition = false,
-    this.resizeToAvoidBottomInset = true,
-    this.searchForInitialValue = false,
-    this.forceAndroidLocationManager = false,
-    this.forceSearchOnZoomChanged = false,
-    this.automaticallyImplyAppBarLeading = true,
-    this.autocompleteOnTrailingWhitespace = false,
-    this.hidePlaceDetailsWhenDraggingPin = true,
   }) : super(key: key);
 
   final String apiKey;
@@ -93,71 +80,11 @@ class PlacePicker extends StatefulWidget {
   final bool strictbounds;
   final String region;
 
-  /// If true the [body] and the scaffold's floating widgets should size
-  /// themselves to avoid the onscreen keyboard whose height is defined by the
-  /// ambient [MediaQuery]'s [MediaQueryData.viewInsets] `bottom` property.
-  ///
-  /// For example, if there is an onscreen keyboard displayed above the
-  /// scaffold, the body can be resized to avoid overlapping the keyboard, which
-  /// prevents widgets inside the body from being obscured by the keyboard.
-  ///
-  /// Defaults to true.
-  final bool resizeToAvoidBottomInset;
-
-  final bool selectInitialPosition;
-
   /// By using default setting of Place Picker, it will result result when user hits the select here button.
   ///
   /// If you managed to use your own [selectedPlaceWidgetBuilder], then this WILL NOT be invoked, and you need use data which is
   /// being sent with [selectedPlaceWidgetBuilder].
   final ValueChanged<PickResult> onPlacePicked;
-
-  /// optional - builds selected place's UI
-  ///
-  /// It is provided by default if you leave it as a null.
-  /// INPORTANT: If this is non-null, [onPlacePicked] will not be invoked, as there will be no default 'Select here' button.
-  final SelectedPlaceWidgetBuilder selectedPlaceWidgetBuilder;
-
-  /// optional - builds customized pin widget which indicates current pointing position.
-  ///
-  /// It is provided by default if you leave it as a null.
-  final PinBuilder pinBuilder;
-
-  /// optional - sets 'proxy' value in google_maps_webservice
-  ///
-  /// In case of using a proxy the baseUrl can be set.
-  /// The apiKey is not required in case the proxy sets it.
-  /// (Not storing the apiKey in the app is good practice)
-  final String proxyBaseUrl;
-
-  /// optional - set 'client' value in google_maps_webservice
-  ///
-  /// In case of using a proxy url that requires authentication
-  /// or custom configuration
-  final BaseClient httpClient;
-
-  /// Whether to search for the initial value or not
-  final bool searchForInitialValue;
-
-  /// On Android devices you can set [forceAndroidLocationManager]
-  /// to true to force the plugin to use the [LocationManager] to determine the
-  /// position instead of the [FusedLocationProviderClient]. On iOS this is ignored.
-  final bool forceAndroidLocationManager;
-
-  /// Allow searching place when zoom has changed. By default searching is disabled when zoom has changed in order to prevent unwilling API usage.
-  final bool forceSearchOnZoomChanged;
-
-  /// Whether to display appbar backbutton. Defaults to true.
-  final bool automaticallyImplyAppBarLeading;
-
-  /// Will perform an autocomplete search, if set to true. Note that setting
-  /// this to true, while providing a smoother UX experience, may cause
-  /// additional unnecessary queries to the Places API.
-  ///
-  /// Defaults to false.
-  final bool autocompleteOnTrailingWhitespace;
-
-  final bool hidePlaceDetailsWhenDraggingPin;
 
   @override
   _PlacePickerState createState() => _PlacePickerState();
@@ -177,12 +104,7 @@ class _PlacePickerState extends State<PlacePicker> {
 
   Future<PlaceProvider> _initPlaceProvider() async {
     final headers = await GoogleApiHeaders().getHeaders();
-    final provider = PlaceProvider(
-      widget.apiKey,
-      widget.proxyBaseUrl,
-      widget.httpClient,
-      headers,
-    );
+    final provider = PlaceProvider(widget.apiKey, headers);
     provider.sessionToken = _uuid.v4();
     provider.desiredAccuracy = widget.desiredLocationAccuracy;
     provider.setMapType(widget.initialMapType);
@@ -208,7 +130,6 @@ class _PlacePickerState extends State<PlacePicker> {
               child: Builder(
                 builder: (context) {
                   return Scaffold(
-                    resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
                     extendBodyBehindAppBar: true,
                     appBar: AppBar(
                       automaticallyImplyLeading: false,
@@ -258,40 +179,36 @@ class _PlacePickerState extends State<PlacePicker> {
   Widget _buildSearchBar() {
     return Row(
       children: <Widget>[
-        widget.automaticallyImplyAppBarLeading
-            ? IconButton(
-                onPressed: () => Navigator.maybePop(context),
-                icon: Icon(
-                  Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
-                ),
-                padding: EdgeInsets.zero,
-              )
-            : SizedBox(width: 15),
+        IconButton(
+          onPressed: () => Navigator.maybePop(context),
+          icon: Icon(
+            Platform.isIOS ? Icons.arrow_back_ios : Icons.arrow_back,
+          ),
+          padding: EdgeInsets.zero,
+        ),
         Expanded(
           child: AutoCompleteSearch(
-              key: _autocompleteKey,
-              sessionToken: provider.sessionToken,
-              hintText: widget.hintText,
-              searchingText: widget.searchingText,
-              debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
-              onPicked: (prediction) {
-                _pickPrediction(prediction);
-              },
-              onSearchFailed: (status) {
-                if (widget.onAutoCompleteFailed != null) {
-                  widget.onAutoCompleteFailed(status);
-                }
-              },
-              autocompleteOffset: widget.autocompleteOffset,
-              autocompleteRadius: widget.autocompleteRadius,
-              autocompleteLanguage: widget.autocompleteLanguage,
-              autocompleteComponents: widget.autocompleteComponents,
-              autocompleteTypes: widget.autocompleteTypes,
-              strictbounds: widget.strictbounds,
-              region: widget.region,
-              searchForInitialValue: widget.searchForInitialValue,
-              autocompleteOnTrailingWhitespace:
-                  widget.autocompleteOnTrailingWhitespace),
+            key: _autocompleteKey,
+            sessionToken: provider.sessionToken,
+            hintText: widget.hintText,
+            searchingText: widget.searchingText,
+            debounceMilliseconds: widget.autoCompleteDebounceInMilliseconds,
+            onPicked: (prediction) {
+              _pickPrediction(prediction);
+            },
+            onSearchFailed: (status) {
+              if (widget.onAutoCompleteFailed != null) {
+                widget.onAutoCompleteFailed(status);
+              }
+            },
+            autocompleteOffset: widget.autocompleteOffset,
+            autocompleteRadius: widget.autocompleteRadius,
+            autocompleteLanguage: widget.autocompleteLanguage,
+            autocompleteComponents: widget.autocompleteComponents,
+            autocompleteTypes: widget.autocompleteTypes,
+            strictbounds: widget.strictbounds,
+            region: widget.region,
+          ),
         ),
         SizedBox(width: 5),
       ],
@@ -350,8 +267,7 @@ class _PlacePickerState extends State<PlacePicker> {
   Widget _buildMapWithLocation() {
     if (widget.useCurrentLocation) {
       return FutureBuilder(
-          future: provider
-              .updateCurrentLocation(widget.forceAndroidLocationManager),
+          future: provider.updateCurrentLocation(),
           builder: (context, snap) {
             if (snap.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -381,31 +297,16 @@ class _PlacePickerState extends State<PlacePicker> {
   Widget _buildMap(LatLng initialTarget) {
     return GoogleMapPlacePicker(
       initialTarget: initialTarget,
-      selectedPlaceWidgetBuilder: widget.selectedPlaceWidgetBuilder,
-      pinBuilder: widget.pinBuilder,
-      onSearchFailed: widget.onGeocodingSearchFailed,
-      debounceMilliseconds: widget.cameraMoveDebounceInMilliseconds,
-      enableMapTypeButton: widget.enableMapTypeButton,
-      enableMyLocationButton: widget.enableMyLocationButton,
-      usePinPointingSearch: widget.usePinPointingSearch,
-      usePlaceDetailSearch: widget.usePlaceDetailSearch,
       onMapCreated: widget.onMapCreated,
-      selectInitialPosition: widget.selectInitialPosition,
       language: widget.autocompleteLanguage,
-      forceSearchOnZoomChanged: widget.forceSearchOnZoomChanged,
-      hidePlaceDetailsWhenDraggingPin: widget.hidePlaceDetailsWhenDraggingPin,
-      onToggleMapType: () {
-        provider.switchMapType();
-      },
-      onMyLocation: () async {
+      onMyLocationTap: () async {
         // Prevent to click many times in short period.
         if (provider.isOnUpdateLocationCooldown == false) {
           provider.isOnUpdateLocationCooldown = true;
           Timer(Duration(seconds: widget.myLocationButtonCooldown), () {
             provider.isOnUpdateLocationCooldown = false;
           });
-          await provider
-              .updateCurrentLocation(widget.forceAndroidLocationManager);
+          await provider.updateCurrentLocation();
           await _moveToCurrentPosition();
         }
       },
