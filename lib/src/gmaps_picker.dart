@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gmaps_picker/src/animated_pin.dart';
+import 'package:gmaps_picker/src/autocomplete_search.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class GMapsPicker extends StatefulWidget {
@@ -22,13 +23,21 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        _buildGoogleMap(context),
-        AnimatedPin(isAnimating: false),
-        if (_locationPick != null) _buildFloatingCard(),
-        _buildMyLocationButton(context),
-      ],
+    return Scaffold(
+      appBar: AppBar(
+        title: AutoCompleteSearch(),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Stack(
+        children: <Widget>[
+          _buildGoogleMap(context),
+          AnimatedPin(isAnimating: false),
+          if (_locationPick != null) _buildFloatingCard(),
+          _buildMyLocationButton(context),
+        ],
+      ),
+      extendBodyBehindAppBar: true,
     );
   }
 
