@@ -28,6 +28,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
         title: AutoCompleteSearch(),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
       body: Stack(
         children: <Widget>[
