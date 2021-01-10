@@ -53,7 +53,6 @@ class PlacePicker extends StatefulWidget {
     this.region,
     this.selectInitialPosition = false,
     this.resizeToAvoidBottomInset = true,
-    this.initialSearchString,
     this.searchForInitialValue = false,
     this.forceAndroidLocationManager = false,
     this.forceSearchOnZoomChanged = false,
@@ -136,9 +135,6 @@ class PlacePicker extends StatefulWidget {
   /// In case of using a proxy url that requires authentication
   /// or custom configuration
   final BaseClient httpClient;
-
-  /// Initial value of autocomplete search
-  final String initialSearchString;
 
   /// Whether to search for the initial value or not
   final bool searchForInitialValue;
@@ -293,7 +289,6 @@ class _PlacePickerState extends State<PlacePicker> {
               autocompleteTypes: widget.autocompleteTypes,
               strictbounds: widget.strictbounds,
               region: widget.region,
-              initialSearchString: widget.initialSearchString,
               searchForInitialValue: widget.searchForInitialValue,
               autocompleteOnTrailingWhitespace:
                   widget.autocompleteOnTrailingWhitespace),

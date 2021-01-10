@@ -23,7 +23,6 @@ class AutoCompleteSearch extends StatefulWidget {
     this.autocompleteTypes,
     this.strictbounds,
     this.region,
-    this.initialSearchString,
     this.searchForInitialValue,
     this.autocompleteOnTrailingWhitespace,
   }) : super(key: key);
@@ -42,7 +41,6 @@ class AutoCompleteSearch extends StatefulWidget {
   final List<Component> autocompleteComponents;
   final bool strictbounds;
   final String region;
-  final String initialSearchString;
   final bool searchForInitialValue;
   final bool autocompleteOnTrailingWhitespace;
 
@@ -60,14 +58,6 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialSearchString != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.text = widget.initialSearchString;
-        if (widget.searchForInitialValue) {
-          _onSearchInputChange();
-        }
-      });
-    }
     controller.addListener(_onSearchInputChange);
     focus.addListener(_onFocusChanged);
   }
