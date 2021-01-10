@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:gmaps_picker/src/animated_pin.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+/// GMapsPicker is used to get the location from google maps. This widget is a
+/// full page widget which you can open using a navigator.
 class GMapsPicker extends StatefulWidget {
   const GMapsPicker({
     Key key,
@@ -20,6 +23,31 @@ class GMapsPicker extends StatefulWidget {
 
 class _GMapsPickerState extends State<GMapsPicker> {
   Location _locationPick;
+
+  /// Get the current position of the user.
+  Future<Position> _getCurrentLocation() async {
+    final isEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isEnabled) {
+      throw LocationServiceNotEnabledException();
+    }
+
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.deniedForever) {
+      // We cannot ask for any more permission, it has been permanently denied.
+      throw LocationPermissionNotProvidedException();
+    }
+
+    if (permission == LocationPermission.denied) {
+      // If it is denied, ask them for permission again.
+      final permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        throw LocationPermissionNotProvidedException();
+      }
+    }
+
+    return await Geolocator.getCurrentPosition();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +79,15 @@ class _GMapsPickerState extends State<GMapsPicker> {
       mapType: MapType.normal,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
-      onMapCreated: (GoogleMapController controller) {
-        // Zoom to a level where map is discernable with respect to a city.
-        controller.animateCamera(
-          CameraUpdate.newLatLngZoom(widget.initialLocation, 15),
-        );
+      onMapCreated: (GoogleMapController controller) async {
+        final currentPosition = await _getCurrentLocation();
+
+        // Move the map to the current location of the user. Also, zoom to a
+        // level where the map is discernable with respect to a city
+        await controller.animateCamera(CameraUpdate.newLatLngZoom(
+          LatLng(currentPosition.latitude, currentPosition.longitude),
+          15,
+        ));
       },
       onCameraIdle: () {},
       onCameraMoveStarted: () {},
@@ -134,3 +166,9 @@ class Location {
   final String address;
   final LatLng latlng;
 }
+
+/// Exception for when location services are not enabled.
+class LocationServiceNotEnabledException implements Exception {}
+
+/// Exception for when location permission is not accepted by user.
+class LocationPermissionNotProvidedException implements Exception {}
