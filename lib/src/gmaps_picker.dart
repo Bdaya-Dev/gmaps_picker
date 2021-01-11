@@ -83,6 +83,11 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// Whether the map is being moved.
   bool _isMoving = false;
 
+  /// List of found locations based on the search term. This list is populated
+  /// when the search field is in focus and there is locations that match
+  /// the search term.
+  List<Location> _foundLocations = [];
+
   @override
   void initState() {
     super.initState();
@@ -137,18 +142,55 @@ class _GMapsPickerState extends State<GMapsPicker> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                _buildGoogleMap(context),
-                Center(child: AnimatedPin(isAnimating: _isMoving)),
-                _buildMyLocationButton(context),
-              ],
-            ),
+          Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    _buildGoogleMap(context),
+                    Center(child: AnimatedPin(isAnimating: _isMoving)),
+                    _buildMyLocationButton(context),
+                  ],
+                ),
+              ),
+              _buildCurrentLocationBar()
+            ],
           ),
-          _buildCurrentLocationBar()
+          if (_foundLocations.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(top: 90, left: 20, right: 12),
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                clipBehavior: Clip.antiAlias,
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  children: [
+                    ListTile(
+                      title: Text('Samakhushi, Kathmandu'),
+                      subtitle: Text('Nepal'),
+                      visualDensity: VisualDensity.compact,
+                      onTap: () {},
+                    ),
+                    ListTile(
+                      title: Text('Samakhushi, Kathmandu'),
+                      subtitle: Text('Nepal'),
+                      visualDensity: VisualDensity.compact,
+                      onTap: () {},
+                    ),
+                    ListTile(
+                      title: Text('Samakhushi, Kathmandu'),
+                      subtitle: Text('Nepal'),
+                      visualDensity: VisualDensity.compact,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            )
         ],
       ),
       extendBodyBehindAppBar: true,
