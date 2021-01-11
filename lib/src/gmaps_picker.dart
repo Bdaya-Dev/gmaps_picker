@@ -27,11 +27,40 @@ class GMapsPicker extends StatefulWidget {
     @required this.initialLocation,
   }) : super(key: key);
 
-  /// The initial location where the map is first shown.
+  /// The initial location where the map is first shown. You may use the value
+  /// returned by [getCurrentLocation] function here.
   final LatLng initialLocation;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
+
+  /// Get the current location of the user. It throw exceptions if either the
+  /// location service is not enabled or the permission to access location has
+  /// been denied.
+  static Future<LatLng> getCurrentLocation() async {
+    final isEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!isEnabled) {
+      throw LocationServiceNotEnabledException();
+    }
+
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.deniedForever) {
+      // We cannot ask for any more permission, it has been permanently denied.
+      throw LocationPermissionDeniedForeverException();
+    }
+
+    if (permission == LocationPermission.denied) {
+      // If it is denied, ask them for permission again.
+      final permission = await Geolocator.requestPermission();
+      if (permission != LocationPermission.whileInUse &&
+          permission != LocationPermission.always) {
+        throw LocationPermissionNotProvidedException();
+      }
+    }
+
+    final position = await Geolocator.getCurrentPosition();
+    return LatLng(position.latitude, position.longitude);
+  }
 }
 
 class _GMapsPickerState extends State<GMapsPicker> {
@@ -46,31 +75,21 @@ class _GMapsPickerState extends State<GMapsPicker> {
   bool _isMoving = false;
 
   /// When the widget first renders, it starts geocoding the current address.
+  ///
+  /// This is true because the widget starts reverse geocoding immediately
+  /// using the [widget.initialLocation].
   bool _isReverseGeocoding = true;
 
-  /// Get the current position of the user.
-  Future<Position> _getCurrentLocation() async {
-    final isEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!isEnabled) {
-      throw LocationServiceNotEnabledException();
-    }
+  @override
+  void initState() {
+    super.initState();
 
-    final permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.deniedForever) {
-      // We cannot ask for any more permission, it has been permanently denied.
-      throw LocationPermissionNotProvidedException();
-    }
-
-    if (permission == LocationPermission.denied) {
-      // If it is denied, ask them for permission again.
-      final permission = await Geolocator.requestPermission();
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        throw LocationPermissionNotProvidedException();
-      }
-    }
-
-    return await Geolocator.getCurrentPosition();
+    _currentMarker = LatLng(
+      widget.initialLocation.latitude,
+      widget.initialLocation.longitude,
+    );
+    // Reverse geocode the current marker.
+    _reverseGeocode();
   }
 
   /// Reverse geocode from the location pointed by current marker.
@@ -182,18 +201,6 @@ class _GMapsPickerState extends State<GMapsPicker> {
       mapType: MapType.normal,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
-      onMapCreated: (GoogleMapController controller) async {
-        final currentPosition = await _getCurrentLocation();
-        _currentMarker =
-            LatLng(currentPosition.latitude, currentPosition.longitude);
-
-        // Move the map to the current location of the user. Also, zoom to a
-        // level where the map is discernable with respect to a city
-        await controller
-            .animateCamera(CameraUpdate.newLatLngZoom(_currentMarker, 15));
-
-        await _reverseGeocode();
-      },
       onCameraMove: (CameraPosition position) {
         _currentMarker = position.target;
       },
@@ -252,3 +259,6 @@ class LocationServiceNotEnabledException implements Exception {}
 
 /// Exception for when location permission is not accepted by user.
 class LocationPermissionNotProvidedException implements Exception {}
+
+/// Exception for when location permission is denied forever by the user.
+class LocationPermissionDeniedForeverException implements Exception {}

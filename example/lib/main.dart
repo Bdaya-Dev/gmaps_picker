@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gmaps_picker/gmaps_picker.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const apiKey = 'put-your-api-key-here';
 
@@ -35,17 +34,19 @@ class _HomePageState extends State<HomePage> {
         child: ElevatedButton(
           child: Text('Load Google Map'),
           onPressed: () async {
-            final location = await Navigator.push(
+            final currentLocation = await GMapsPicker.getCurrentLocation();
+
+            final pickedLocation = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => GMapsPicker(
-                  initialLocation: LatLng(-33.8567844, 151.213108),
+                  initialLocation: currentLocation,
                 ),
               ),
             );
 
-            if (location != null) {
-              print('You picked: ${location.address}');
+            if (pickedLocation != null) {
+              print('You picked: ${pickedLocation.address}');
             }
           },
         ),
