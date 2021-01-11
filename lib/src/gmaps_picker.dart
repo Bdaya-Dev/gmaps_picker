@@ -129,7 +129,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
         setState(() {
           _locationPick = Location(
-            address: first.toString(),
+            address: '${first.street}, ${first.locality}',
             latlng: _currentMarker,
           );
         });
@@ -234,6 +234,11 @@ class _GMapsPickerState extends State<GMapsPicker> {
         // Change the map location once it is initialized.
         if (widget.onMapInitialization != null) {
           final newPos = await widget.onMapInitialization();
+          setState(() {
+            _currentMarker = newPos.latlng;
+          });
+          final _ = _reverseGeocode();
+
           await controller.animateCamera(
             CameraUpdate.newLatLngZoom(newPos.latlng, newPos.zoom),
           );
@@ -251,6 +256,9 @@ class _GMapsPickerState extends State<GMapsPicker> {
         setState(() {
           _isMoving = false;
         });
+
+        // Reverse geocode after the location settles in.
+        final _ = _reverseGeocode();
       },
     );
   }
