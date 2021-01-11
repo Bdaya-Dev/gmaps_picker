@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
         child: ElevatedButton(
           child: Text('Load Google Map'),
           onPressed: () async {
-            final pickedLocation = await Navigator.push(
+            final pickedLocation = await Navigator.push<Location>(
               context,
               MaterialPageRoute(
                 builder: (context) => GMapsPicker(
@@ -49,7 +49,7 @@ class _HomePageState extends State<HomePage> {
             );
 
             if (pickedLocation != null) {
-              print('You picked: ${pickedLocation.address}');
+              print('You picked: ${pickedLocation.formattedAddress}');
             }
           },
         ),
