@@ -187,25 +187,34 @@ class _GMapsPickerState extends State<GMapsPicker> {
         child: Row(
           children: [
             Expanded(
-              child: [
-                if (_locationPick == null && !_isReverseGeocoding) Container(),
-                if (_locationPick != null && !_isReverseGeocoding)
-                  Container(
-                    margin: EdgeInsets.only(right: 12),
-                    child: Text(
-                      _locationPick.formattedAddress,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!_isReverseGeocoding && _locationPick != null) ...[
+                    Container(
+                      margin: EdgeInsets.only(right: 12),
+                      child: Text(
+                        _locationPick.formattedAddress,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                  ),
-                if (_isReverseGeocoding)
-                  widget.buildReverseGeocodeLoading != null
-                      ? widget.buildReverseGeocodeLoading(context)
-                      : Container(
-                          alignment: Alignment.centerLeft,
-                          child: CircularProgressIndicator(),
-                        ),
-              ][0],
+                    Text(
+                      _locationPick.placemark.country,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ],
+                  if (_isReverseGeocoding)
+                    widget.buildReverseGeocodeLoading != null
+                        ? widget.buildReverseGeocodeLoading(context)
+                        : Container(
+                            alignment: Alignment.centerLeft,
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator(),
+                          ),
+                ],
+              ),
             ),
             ElevatedButton.icon(
               onPressed: _locationPick != null ? _onSelectHere : null,
