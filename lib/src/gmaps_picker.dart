@@ -129,7 +129,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
         setState(() {
           _locationPick = Location(
-            address: '${first.street}, ${first.locality}',
+            placemark: first,
             latlng: _currentMarker,
           );
         });
@@ -193,7 +193,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
                   Container(
                     margin: EdgeInsets.only(right: 12),
                     child: Text(
-                      _locationPick.address,
+                      _locationPick.formattedAddress,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -292,12 +292,16 @@ class _GMapsPickerState extends State<GMapsPicker> {
 /// A location that was picked from google maps.
 class Location {
   Location({
-    @required this.address,
+    @required this.placemark,
     @required this.latlng,
   });
 
-  final String address;
+  final Placemark placemark;
   final LatLng latlng;
+
+  /// Get the formatted address of this location.
+  String get formattedAddress =>
+      '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}';
 }
 
 /// Exception for when location services are not enabled.
