@@ -62,6 +62,11 @@ class _GMapsPickerState extends State<GMapsPicker> {
     return await Geolocator.getCurrentPosition();
   }
 
+  void _onSelectHere() {
+    // Return the picked location when popping the nav.
+    Navigator.pop(context, _locationPick);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -71,12 +76,45 @@ class _GMapsPickerState extends State<GMapsPicker> {
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
       ),
-      body: Stack(
-        children: <Widget>[
-          _buildGoogleMap(context),
-          Center(child: AnimatedPin(isAnimating: _isMoving)),
-          if (_locationPick != null) _buildFloatingCard(),
-          _buildMyLocationButton(context),
+      body: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: <Widget>[
+                _buildGoogleMap(context),
+                Center(child: AnimatedPin(isAnimating: _isMoving)),
+                _buildMyLocationButton(context),
+              ],
+            ),
+          ),
+          Material(
+            elevation: 4,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(right: 12),
+                      child: Text(
+                        'Your Location',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _locationPick != null ? _onSelectHere : null,
+                    icon: Icon(
+                      Icons.location_pin,
+                      size: 20,
+                    ),
+                    label: Text('Select Here'),
+                  )
+                ],
+              ),
+            ),
+          )
         ],
       ),
       extendBodyBehindAppBar: true,
@@ -115,42 +153,6 @@ class _GMapsPickerState extends State<GMapsPicker> {
           _isMoving = false;
         });
       },
-    );
-  }
-
-  Widget _buildFloatingCard() {
-    final size = MediaQuery.of(context).size;
-
-    return Positioned(
-      bottom: size.height * 0.05,
-      left: size.width * 0.025,
-      right: size.width * 0.025,
-      child: Card(
-        elevation: 4,
-        child: Container(
-          margin: EdgeInsets.all(10),
-          child: Column(
-            children: <Widget>[
-              Text(
-                _locationPick.address,
-                style: TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                child: Text(
-                  'Select here',
-                  style: TextStyle(fontSize: 16),
-                ),
-                onPressed: () {
-                  // Return the picked location when popping the nav.
-                  Navigator.pop(context, _locationPick);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
