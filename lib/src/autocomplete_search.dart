@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
 
 /// Autocomplete searches for matching addresses based on the given search
 /// input.
@@ -13,7 +12,6 @@ class AutoCompleteSearch extends StatefulWidget {
 class _AutoCompleteSearchState extends State<AutoCompleteSearch> {
   final _controller = TextEditingController();
   Timer _debounceTimer;
-  List<Location> _searchedLocations = [];
 
   @override
   void initState() {
@@ -34,20 +32,7 @@ class _AutoCompleteSearchState extends State<AutoCompleteSearch> {
       _debounceTimer.cancel();
     }
 
-    _debounceTimer = Timer(Duration(seconds: 1), () async {
-      final searchText = _controller.text.trim();
-      if (searchText.isEmpty) {
-        setState(() {
-          _searchedLocations = [];
-        });
-        return;
-      }
-
-      final locations = await locationFromAddress(searchText);
-      setState(() {
-        _searchedLocations = locations;
-      });
-    });
+    _debounceTimer = Timer(Duration(seconds: 1), () async {});
   }
 
   @override
