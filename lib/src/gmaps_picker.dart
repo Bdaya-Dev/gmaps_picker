@@ -29,7 +29,6 @@ class GMapsPicker extends StatefulWidget {
     Key key,
     @required this.initialLocation,
     this.onMapInitialization,
-    this.buildReverseGeocodeLoading,
   }) : super(key: key);
 
   /// The initial location where the map is first shown. You may use the value
@@ -40,10 +39,6 @@ class GMapsPicker extends StatefulWidget {
   /// position after the map is initialized. It supports zooming of the map
   /// as well.
   final ChangeMarkerPositionCallback onMapInitialization;
-
-  /// A widget that is shown when a location is being reverse geocoded. This
-  /// widget is shown at the bottom bar where the location text appears.
-  final WidgetBuilder buildReverseGeocodeLoading;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -88,12 +83,6 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// Whether the map is being moved.
   bool _isMoving = false;
 
-  /// When the widget first renders, it starts geocoding the current address.
-  ///
-  /// This is true because the widget starts reverse geocoding immediately
-  /// using the [widget.initialLocation].
-  bool _isReverseGeocoding = true;
-
   @override
   void initState() {
     super.initState();
@@ -112,39 +101,26 @@ class _GMapsPickerState extends State<GMapsPicker> {
       return;
     }
 
-    if (!_isReverseGeocoding) {
-      // Only setState if this was false, so that no re-renders occur.
+    final placemark = await placemarkFromCoordinates(
+      _currentMarker.latitude,
+      _currentMarker.longitude,
+    );
+    if (placemark.isNotEmpty) {
+      final first = placemark[0];
+
       setState(() {
-        _isReverseGeocoding = true;
+        _locationPick = Location(
+          placemark: first,
+          latlng: _currentMarker,
+        );
       });
+      return;
     }
 
-    try {
-      final placemark = await placemarkFromCoordinates(
-        _currentMarker.latitude,
-        _currentMarker.longitude,
-      );
-      if (placemark.isNotEmpty) {
-        final first = placemark[0];
-
-        setState(() {
-          _locationPick = Location(
-            placemark: first,
-            latlng: _currentMarker,
-          );
-        });
-        return;
-      }
-
-      setState(() {
-        // There was no address found, no need to retain an older address here.
-        _locationPick = null;
-      });
-    } finally {
-      setState(() {
-        _isReverseGeocoding = false;
-      });
-    }
+    setState(() {
+      // There was no address found, no need to retain an older address here.
+      _locationPick = null;
+    });
   }
 
   void _onSelectHere() {
@@ -189,31 +165,22 @@ class _GMapsPickerState extends State<GMapsPicker> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (!_isReverseGeocoding && _locationPick != null) ...[
-                    Container(
-                      margin: EdgeInsets.only(right: 12),
-                      child: Text(
-                        _locationPick.formattedAddress,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Text(
-                      _locationPick.placemark.country,
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                  ],
-                  if (_isReverseGeocoding)
-                    widget.buildReverseGeocodeLoading != null
-                        ? widget.buildReverseGeocodeLoading(context)
-                        : Container(
-                            alignment: Alignment.centerLeft,
-                            width: 32,
-                            height: 32,
-                            child: CircularProgressIndicator(),
+                children: _locationPick != null
+                    ? [
+                        Container(
+                          margin: EdgeInsets.only(right: 12),
+                          child: Text(
+                            _locationPick.formattedAddress,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                ],
+                        ),
+                        Text(
+                          _locationPick.placemark.country,
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ]
+                    : [],
               ),
             ),
             ElevatedButton.icon(
