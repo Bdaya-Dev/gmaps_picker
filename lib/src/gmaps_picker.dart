@@ -300,8 +300,28 @@ class Location {
   final LatLng latlng;
 
   /// Get the formatted address of this location.
-  String get formattedAddress =>
-      '${placemark.street}, ${placemark.subLocality}, ${placemark.locality}';
+  String get formattedAddress {
+    var address = placemark.street ?? '';
+
+    if (placemark.subLocality?.isNotEmpty == true) {
+      if (placemark.street?.isNotEmpty == true) {
+        address = address + ', ';
+      }
+
+      address = address + placemark.subLocality;
+    }
+
+    if (placemark.locality?.isNotEmpty == true) {
+      if (placemark.street?.isNotEmpty == true ||
+          placemark.subLocality?.isNotEmpty == true) {
+        address = address + ', ';
+      }
+
+      address = address + placemark.locality;
+    }
+
+    return address;
+  }
 }
 
 /// Exception for when location services are not enabled.
