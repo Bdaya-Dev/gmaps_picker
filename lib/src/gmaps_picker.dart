@@ -7,14 +7,25 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /// GMapsPicker is used to get the location from google maps. This widget is a
 /// full page widget which you can open using a navigator.
+///
+/// Example:
+/// ```
+/// final pickedLocation = await Navigator.push<Location>(context, MaterialPageRoute(
+///   builder: (context) => GMapsPicker(
+///     initialLocation: LatLng(-33.8567844, 151.213108),
+///   ),
+/// ));
+///
+/// if (pickedLocation != null) {
+///   // A location was picked, do something with.
+/// }
+/// ```
 class GMapsPicker extends StatefulWidget {
   const GMapsPicker({
     Key key,
     @required this.initialLocation,
-    this.onPlacePicked,
   }) : super(key: key);
 
-  final ValueChanged<Location> onPlacePicked;
   final LatLng initialLocation;
 
   @override
@@ -132,7 +143,8 @@ class _GMapsPickerState extends State<GMapsPicker> {
                   style: TextStyle(fontSize: 16),
                 ),
                 onPressed: () {
-                  widget.onPlacePicked(_locationPick);
+                  // Return the picked location when popping the nav.
+                  Navigator.pop(context, _locationPick);
                 },
               ),
             ],

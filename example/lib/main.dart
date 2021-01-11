@@ -34,19 +34,19 @@ class _HomePageState extends State<HomePage> {
       body: Center(
         child: ElevatedButton(
           child: Text('Load Google Map'),
-          onPressed: () {
-            Navigator.push(
+          onPressed: () async {
+            final location = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => GMapsPicker(
                   initialLocation: LatLng(-33.8567844, 151.213108),
-                  onPlacePicked: (result) {
-                    print('You picked: ${result.address}');
-                    Navigator.of(context).pop();
-                  },
                 ),
               ),
             );
+
+            if (location != null) {
+              print('You picked: ${location.address}');
+            }
           },
         ),
       ),
