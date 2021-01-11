@@ -1,12 +1,54 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+
+/// Autocomplete searches for matching addresses based on the given search
+/// input.
 class AutoCompleteSearch extends StatefulWidget {
   @override
-  AutoCompleteSearchState createState() => AutoCompleteSearchState();
+  _AutoCompleteSearchState createState() => _AutoCompleteSearchState();
 }
 
-class AutoCompleteSearchState extends State<AutoCompleteSearch> {
-  TextEditingController controller = TextEditingController();
+class _AutoCompleteSearchState extends State<AutoCompleteSearch> {
+  final _controller = TextEditingController();
+  Timer _debounceTimer;
+  List<Location> _searchedLocations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onSearchChange);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Search for the locations from the given search text while debouncing.
+  void _onSearchChange() {
+    if (_debounceTimer?.isActive == true) {
+      _debounceTimer.cancel();
+    }
+
+    _debounceTimer = Timer(Duration(seconds: 1), () async {
+      final searchText = _controller.text.trim();
+      if (searchText.isEmpty) {
+        setState(() {
+          _searchedLocations = [];
+        });
+        return;
+      }
+
+      final locations = await locationFromAddress(searchText);
+      setState(() {
+        _searchedLocations = locations;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +56,7 @@ class AutoCompleteSearchState extends State<AutoCompleteSearch> {
       elevation: 3,
       borderRadius: BorderRadius.circular(4),
       child: TextField(
-        controller: controller,
+        controller: _controller,
         decoration: InputDecoration(
           hintText: 'Search for a locality, landmark or city',
           isDense: true,
