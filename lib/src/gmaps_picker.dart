@@ -29,6 +29,7 @@ class GMapsPicker extends StatefulWidget {
     Key key,
     @required this.initialLocation,
     this.onMapInitialization,
+    this.buildReverseGeocodeLoading,
   }) : super(key: key);
 
   /// The initial location where the map is first shown. You may use the value
@@ -39,6 +40,10 @@ class GMapsPicker extends StatefulWidget {
   /// position after the map is initialized. It supports zooming of the map
   /// as well.
   final ChangeMarkerPositionCallback onMapInitialization;
+
+  /// A widget that is shown when a location is being reverse geocoded. This
+  /// widget is shown at the bottom bar where the location text appears.
+  final WidgetBuilder buildReverseGeocodeLoading;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -167,37 +172,52 @@ class _GMapsPickerState extends State<GMapsPicker> {
               ],
             ),
           ),
-          Material(
-            elevation: 4,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      margin: EdgeInsets.only(right: 12),
-                      child: Text(
-                        'Your Location',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: _locationPick != null ? _onSelectHere : null,
-                    icon: Icon(
-                      Icons.location_pin,
-                      size: 20,
-                    ),
-                    label: Text('Select Here'),
-                  )
-                ],
-              ),
-            ),
-          )
+          _buildCurrentLocationBar()
         ],
       ),
       extendBodyBehindAppBar: true,
+    );
+  }
+
+  Widget _buildCurrentLocationBar() {
+    return Material(
+      elevation: 4,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: [
+                if (_locationPick == null && !_isReverseGeocoding) Container(),
+                if (_locationPick != null && !_isReverseGeocoding)
+                  Container(
+                    margin: EdgeInsets.only(right: 12),
+                    child: Text(
+                      _locationPick.address,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                if (_isReverseGeocoding)
+                  widget.buildReverseGeocodeLoading != null
+                      ? widget.buildReverseGeocodeLoading(context)
+                      : Container(
+                          alignment: Alignment.centerLeft,
+                          child: CircularProgressIndicator(),
+                        ),
+              ][0],
+            ),
+            ElevatedButton.icon(
+              onPressed: _locationPick != null ? _onSelectHere : null,
+              icon: Icon(
+                Icons.location_pin,
+                size: 20,
+              ),
+              label: Text('Select Here'),
+            )
+          ],
+        ),
+      ),
     );
   }
 
