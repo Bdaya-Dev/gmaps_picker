@@ -34,13 +34,16 @@ class _HomePageState extends State<HomePage> {
         child: ElevatedButton(
           child: Text('Load Google Map'),
           onPressed: () async {
-            final currentLocation = await GMapsPicker.getCurrentLocation();
-
             final pickedLocation = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => GMapsPicker(
-                  initialLocation: currentLocation,
+                  initialLocation: LatLng(-33.8567844, 151.213108),
+                  onMapInitialization: () async {
+                    final currentLocation =
+                        await GMapsPicker.getCurrentLocation();
+                    return MarkerPosition(latlng: currentLocation, zoom: 15);
+                  },
                 ),
               ),
             );

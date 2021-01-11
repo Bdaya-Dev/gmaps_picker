@@ -6,6 +6,9 @@ import 'package:gmaps_picker/src/animated_pin.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+/// A function which returns a new marker position.
+typedef ChangeMarkerPositionCallback = Future<MarkerPosition> Function();
+
 /// GMapsPicker is used to get the location from google maps. This widget is a
 /// full page widget which you can open using a navigator.
 ///
@@ -25,11 +28,17 @@ class GMapsPicker extends StatefulWidget {
   const GMapsPicker({
     Key key,
     @required this.initialLocation,
+    this.onMapInitialization,
   }) : super(key: key);
 
   /// The initial location where the map is first shown. You may use the value
   /// returned by [getCurrentLocation] function here.
   final LatLng initialLocation;
+
+  /// Whatever marker position this callback returns will update the map
+  /// position after the map is initialized. It supports zooming of the map
+  /// as well.
+  final ChangeMarkerPositionCallback onMapInitialization;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -201,6 +210,15 @@ class _GMapsPickerState extends State<GMapsPicker> {
       mapType: MapType.normal,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
+      onMapCreated: (controller) async {
+        // Change the map location once it is initialized.
+        if (widget.onMapInitialization != null) {
+          final newPos = await widget.onMapInitialization();
+          await controller.animateCamera(
+            CameraUpdate.newLatLngZoom(newPos.latlng, newPos.zoom),
+          );
+        }
+      },
       onCameraMove: (CameraPosition position) {
         _currentMarker = position.target;
       },
@@ -262,3 +280,17 @@ class LocationPermissionNotProvidedException implements Exception {}
 
 /// Exception for when location permission is denied forever by the user.
 class LocationPermissionDeniedForeverException implements Exception {}
+
+/// MarkerPosition defined where the marker is located at on the map.
+class MarkerPosition {
+  MarkerPosition({
+    @required this.latlng,
+    @required this.zoom,
+  });
+
+  /// Latitude of the location.
+  final LatLng latlng;
+
+  /// Zoom factor on google maps.
+  final double zoom;
+}
