@@ -12,6 +12,7 @@ dependencies:
 
   google_maps_flutter: ^1.0.10
   geolocator: ^6.1.13
+  geocoding: ^1.0.5
 
 dev_dependencies:
   pedantic: ^1.9.2

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gmaps_picker/src/animated_pin.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
@@ -26,6 +27,7 @@ class GMapsPicker extends StatefulWidget {
     @required this.initialLocation,
   }) : super(key: key);
 
+  /// The initial location where the map is first shown.
   final LatLng initialLocation;
 
   @override
@@ -33,9 +35,18 @@ class GMapsPicker extends StatefulWidget {
 }
 
 class _GMapsPickerState extends State<GMapsPicker> {
+  /// The location that is pointed by the marker with additional geocoded
+  /// location.
   Location _locationPick;
+
+  /// The current location pointed by the marker shown in the center.
   LatLng _currentMarker;
+
+  /// Whether the map is being moved.
   bool _isMoving = false;
+
+  /// When the widget first renders, it starts geocoding the current address.
+  bool _isReverseGeocoding = true;
 
   /// Get the current position of the user.
   Future<Position> _getCurrentLocation() async {
@@ -60,6 +71,47 @@ class _GMapsPickerState extends State<GMapsPicker> {
     }
 
     return await Geolocator.getCurrentPosition();
+  }
+
+  /// Reverse geocode from the location pointed by current marker.
+  Future<void> _reverseGeocode() async {
+    if (_currentMarker == null) {
+      return;
+    }
+
+    if (!_isReverseGeocoding) {
+      // Only setState if this was false, so that no re-renders occur.
+      setState(() {
+        _isReverseGeocoding = true;
+      });
+    }
+
+    try {
+      final placemark = await placemarkFromCoordinates(
+        _currentMarker.latitude,
+        _currentMarker.longitude,
+      );
+      if (placemark.isNotEmpty) {
+        final first = placemark[0];
+
+        setState(() {
+          _locationPick = Location(
+            address: first.toString(),
+            latlng: _currentMarker,
+          );
+        });
+        return;
+      }
+
+      setState(() {
+        // There was no address found, no need to retain an older address here.
+        _locationPick = null;
+      });
+    } finally {
+      setState(() {
+        _isReverseGeocoding = false;
+      });
+    }
   }
 
   void _onSelectHere() {
@@ -139,6 +191,8 @@ class _GMapsPickerState extends State<GMapsPicker> {
         // level where the map is discernable with respect to a city
         await controller
             .animateCamera(CameraUpdate.newLatLngZoom(_currentMarker, 15));
+
+        await _reverseGeocode();
       },
       onCameraMove: (CameraPosition position) {
         _currentMarker = position.target;
