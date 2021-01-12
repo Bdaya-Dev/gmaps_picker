@@ -71,8 +71,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
     _debounceTimer = Timer(Duration(seconds: 1), () async {
       final trimmed = _controller.text.trim();
       if (trimmed.isEmpty) {
-        widget.onChange(AutocompleteState(
-          isFocused: _focusNode.hasFocus,
+        widget.onChange(widget.value.copyWith(
           predictions: [],
           isLoading: false,
           exception: null,
@@ -94,8 +93,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
           strictbounds: widget.options?.strictbounds ?? false,
         );
 
-        widget.onChange(AutocompleteState(
-          isFocused: _focusNode.hasFocus,
+        widget.onChange(widget.value.copyWith(
           predictions: results?.predictions ?? [],
           isLoading: false,
           exception: null,
