@@ -31,6 +31,7 @@ class GMapsPicker extends StatefulWidget {
     @required this.initialLocation,
     @required this.googleMapsApiKey,
     this.onMapInitialization,
+    this.options,
   }) : super(key: key);
 
   /// The initial location where the map is first shown. You may use the value
@@ -45,6 +46,9 @@ class GMapsPicker extends StatefulWidget {
   /// API key to access google maps services. This is required for autocomplete
   /// search.
   final String googleMapsApiKey;
+
+  /// Options used to configure the autocomplete search results.
+  final AutocompleteOptions options;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -143,7 +147,10 @@ class _GMapsPickerState extends State<GMapsPicker> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: AutocompleteSearch(googleMapsApiKey: widget.googleMapsApiKey),
+        title: AutocompleteSearch(
+          googleMapsApiKey: widget.googleMapsApiKey,
+          options: widget.options,
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),
