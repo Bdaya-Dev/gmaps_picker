@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> {
               MaterialPageRoute(
                 builder: (context) => GMapsPicker(
                   initialLocation: LatLng(-33.8567844, 151.213108),
+                  googleMapsApiKey: apiKey,
                   onMapInitialization: () async {
                     final currentLocation =
                         await GMapsPicker.getCurrentLocation();

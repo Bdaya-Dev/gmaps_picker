@@ -17,6 +17,7 @@ typedef ChangeMarkerPositionCallback = Future<MarkerPosition> Function();
 /// final pickedLocation = await Navigator.push<Location>(context, MaterialPageRoute(
 ///   builder: (context) => GMapsPicker(
 ///     initialLocation: LatLng(-33.8567844, 151.213108),
+///     googleMapsApiKey: 'your-api-key',
 ///   ),
 /// ));
 ///
@@ -28,6 +29,7 @@ class GMapsPicker extends StatefulWidget {
   const GMapsPicker({
     Key key,
     @required this.initialLocation,
+    @required this.googleMapsApiKey,
     this.onMapInitialization,
   }) : super(key: key);
 
@@ -39,6 +41,10 @@ class GMapsPicker extends StatefulWidget {
   /// position after the map is initialized. It supports zooming of the map
   /// as well.
   final ChangeMarkerPositionCallback onMapInitialization;
+
+  /// API key to access google maps services. This is required for autocomplete
+  /// search.
+  final String googleMapsApiKey;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -137,7 +143,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: AutoCompleteSearch(),
+        title: AutocompleteSearch(googleMapsApiKey: widget.googleMapsApiKey),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: IconThemeData(color: Colors.black),

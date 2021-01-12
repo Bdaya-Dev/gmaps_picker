@@ -1,21 +1,30 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:google_place/google_place.dart';
 
 /// Autocomplete searches for matching addresses based on the given search
 /// input.
-class AutoCompleteSearch extends StatefulWidget {
+class AutocompleteSearch extends StatefulWidget {
+  const AutocompleteSearch({Key key, @required this.googleMapsApiKey})
+      : super(key: key);
+
+  /// API key to access google maps for autocomplete feature.
+  final String googleMapsApiKey;
+
   @override
-  _AutoCompleteSearchState createState() => _AutoCompleteSearchState();
+  _AutocompleteSearchState createState() => _AutocompleteSearchState();
 }
 
-class _AutoCompleteSearchState extends State<AutoCompleteSearch> {
+class _AutocompleteSearchState extends State<AutocompleteSearch> {
+  GooglePlace _googlePlace;
   final _controller = TextEditingController();
   Timer _debounceTimer;
 
   @override
   void initState() {
     super.initState();
+    _googlePlace = GooglePlace(widget.googleMapsApiKey);
     _controller.addListener(_onSearchChange);
   }
 
