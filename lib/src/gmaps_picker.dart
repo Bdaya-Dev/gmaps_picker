@@ -272,7 +272,9 @@ class _GMapsPickerState extends State<GMapsPicker> {
                       _autocompleteState.predictions.isEmpty)
                     ListTile(
                       title: Text(
-                        'No matching address found',
+                        _autocompleteState.isLoading
+                            ? 'Loading...'
+                            : 'No matching address found',
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.grey),
                       ),
