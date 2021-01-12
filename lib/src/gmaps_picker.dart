@@ -97,7 +97,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// List of matched predictions based on the search term. This list is
   /// populated when the search field is in focus and there is locations that
   /// match the search term.
-  List<AutocompletePrediction> _foundLocations = [];
+  List<AutocompletePrediction> _matchedPredictions = [];
 
   @override
   void initState() {
@@ -146,7 +146,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
   void _onPredictionMade(List<AutocompletePrediction> predictions) {
     setState(() {
-      _foundLocations = predictions;
+      _matchedPredictions = predictions;
     });
   }
 
@@ -179,36 +179,32 @@ class _GMapsPickerState extends State<GMapsPicker> {
               _buildCurrentLocationBar()
             ],
           ),
-          if (_foundLocations.isNotEmpty)
+          if (_matchedPredictions.isNotEmpty)
             Container(
               margin: EdgeInsets.only(top: 90, left: 20, right: 12),
               child: Material(
                 elevation: 4,
                 borderRadius: BorderRadius.circular(8),
                 clipBehavior: Clip.antiAlias,
-                child: ListView(
+                child: ListView.builder(
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
-                  children: [
-                    ListTile(
-                      title: Text('Samakhushi, Kathmandu'),
-                      subtitle: Text('Nepal'),
-                      visualDensity: VisualDensity.compact,
-                      onTap: () {},
+                  itemCount: _matchedPredictions.length,
+                  itemBuilder: (context, index) => ListTile(
+                    key: Key(index.toString()),
+                    title: Text(
+                      _matchedPredictions[index]
+                              .structuredFormatting
+                              .mainText ??
+                          '',
                     ),
-                    ListTile(
-                      title: Text('Samakhushi, Kathmandu'),
-                      subtitle: Text('Nepal'),
-                      visualDensity: VisualDensity.compact,
-                      onTap: () {},
-                    ),
-                    ListTile(
-                      title: Text('Samakhushi, Kathmandu'),
-                      subtitle: Text('Nepal'),
-                      visualDensity: VisualDensity.compact,
-                      onTap: () {},
-                    ),
-                  ],
+                    subtitle: Text(_matchedPredictions[index]
+                            .structuredFormatting
+                            .secondaryText ??
+                        ''),
+                    visualDensity: VisualDensity.compact,
+                    onTap: () {},
+                  ),
                 ),
               ),
             )

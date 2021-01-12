@@ -69,8 +69,8 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         offset: widget.options?.offset,
         radius: widget.options?.radius,
         sessionToken: widget.options?.sessionToken,
-        strictbounds: widget.options?.strictbounds,
         types: widget.options?.types,
+        strictbounds: widget.options?.strictbounds ?? false,
       );
 
       widget.onPrediction(results.predictions ?? []);
