@@ -54,10 +54,10 @@ class GMapsPicker extends StatefulWidget {
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
 
-  /// Get the current location of the user. It throw exceptions if either the
-  /// location service is not enabled or the permission to access location has
-  /// been denied.
-  static Future<LatLng> getCurrentLocation() async {
+  /// Gets the permission to access current location of the user. It throws
+  /// exceptions if either the location service is not enabled or the permission
+  /// to access location has been denied.
+  static Future<void> getLocationPermission() async {
     final isEnabled = await Geolocator.isLocationServiceEnabled();
     if (!isEnabled) {
       throw LocationServiceNotEnabledException();
@@ -77,7 +77,13 @@ class GMapsPicker extends StatefulWidget {
         throw LocationPermissionNotProvidedException();
       }
     }
+  }
 
+  /// Get the current location of the user. It throws exceptions if either the
+  /// location service is not enabled or the permission to access location has
+  /// been denied.
+  static Future<LatLng> getCurrentLocation() async {
+    await GMapsPicker.getLocationPermission();
     final position = await Geolocator.getCurrentPosition();
     return LatLng(position.latitude, position.longitude);
   }
