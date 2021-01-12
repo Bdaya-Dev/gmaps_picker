@@ -80,25 +80,33 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         return;
       }
 
-      final results = await _googlePlace.autocomplete.get(
-        trimmed,
-        components: widget.options?.components,
-        language: widget.options?.language,
-        location: _fromLatLng(widget.options?.location),
-        origin: _fromLatLng(widget.options?.origin),
-        offset: widget.options?.offset,
-        radius: widget.options?.radius,
-        sessionToken: widget.options?.sessionToken,
-        types: widget.options?.types,
-        strictbounds: widget.options?.strictbounds ?? false,
-      );
+      try {
+        final results = await _googlePlace.autocomplete.get(
+          trimmed,
+          components: widget.options?.components,
+          language: widget.options?.language,
+          location: _fromLatLng(widget.options?.location),
+          origin: _fromLatLng(widget.options?.origin),
+          offset: widget.options?.offset,
+          radius: widget.options?.radius,
+          sessionToken: widget.options?.sessionToken,
+          types: widget.options?.types,
+          strictbounds: widget.options?.strictbounds ?? false,
+        );
 
-      widget.onChange(AutocompleteState(
-        isFocused: _focusNode.hasFocus,
-        predictions: results?.predictions ?? [],
-        isLoading: false,
-        exception: null,
-      ));
+        widget.onChange(AutocompleteState(
+          isFocused: _focusNode.hasFocus,
+          predictions: results?.predictions ?? [],
+          isLoading: false,
+          exception: null,
+        ));
+      } catch (exception) {
+        // Pass the exception to the top.
+        widget.onChange(widget.value.copyWith(
+          isLoading: false,
+          exception: exception,
+        ));
+      }
     });
   }
 
