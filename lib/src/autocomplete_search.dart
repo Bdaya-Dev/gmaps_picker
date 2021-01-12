@@ -11,6 +11,7 @@ class AutocompleteSearch extends StatefulWidget {
     Key key,
     @required this.googleMapsApiKey,
     @required this.onChange,
+    @required this.value,
     this.options,
   }) : super(key: key);
 
@@ -20,9 +21,12 @@ class AutocompleteSearch extends StatefulWidget {
   /// Options used to configure the autocomplete search results.
   final AutocompleteOptions options;
 
-  /// This is a callback which produces an event with either loading state,
-  /// error state or has matched autocompletions.
-  final ValueChanged<AutocompleteChangeEvent> onChange;
+  /// The current value of the autocomplete state.
+  final AutocompleteState value;
+
+  /// This is a callback which produces a new state with either loading state,
+  /// error state or has matched autocompletions or combination.
+  final ValueChanged<AutocompleteState> onChange;
 
   @override
   _AutocompleteSearchState createState() => _AutocompleteSearchState();
@@ -40,6 +44,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
     _googlePlace = GooglePlace(widget.googleMapsApiKey);
     _focusNode = FocusNode();
     _controller.addListener(_onSearchChange);
+    _focusNode.addListener(_onFocusChange);
   }
 
   @override
@@ -48,6 +53,13 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
     _debounceTimer?.cancel();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  /// This is run whenever the input focus changes.
+  void _onFocusChange() {
+    widget.onChange(widget.value.copyWith(
+      isFocused: _focusNode.hasFocus,
+    ));
   }
 
   /// Search for the locations from the given search text while debouncing.
@@ -59,11 +71,11 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
     _debounceTimer = Timer(Duration(seconds: 1), () async {
       final trimmed = _controller.text.trim();
       if (trimmed.isEmpty) {
-        widget.onChange(AutocompleteChangeEvent(
-          isFocused: true,
+        widget.onChange(AutocompleteState(
+          isFocused: _focusNode.hasFocus,
           predictions: [],
           isLoading: false,
-          error: null,
+          exception: null,
         ));
         return;
       }
@@ -81,11 +93,11 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         strictbounds: widget.options?.strictbounds ?? false,
       );
 
-      widget.onChange(AutocompleteChangeEvent(
-        isFocused: true,
+      widget.onChange(AutocompleteState(
+        isFocused: _focusNode.hasFocus,
         predictions: results?.predictions ?? [],
         isLoading: false,
-        error: null,
+        exception: null,
       ));
     });
   }
@@ -97,6 +109,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
       borderRadius: BorderRadius.circular(4),
       child: TextField(
         controller: _controller,
+        focusNode: _focusNode,
         decoration: InputDecoration(
           hintText: 'Search for a locality, landmark or city',
           isDense: true,
@@ -197,7 +210,7 @@ LatLon _fromLatLng(LatLng latLng) {
 }
 
 /// A change event during an autocomplete action.
-class AutocompleteChangeEvent {
+class AutocompleteState {
   /// Whether the autocomplete textfield is in focus.
   final bool isFocused;
 
@@ -207,13 +220,27 @@ class AutocompleteChangeEvent {
   /// Whether the autocomplete is currently loading to fetch new results.
   final bool isLoading;
 
-  /// Any error that was thrown during autocompletion.
-  final Exception error;
+  /// Any exception that was thrown during autocompletion.
+  final Exception exception;
 
-  AutocompleteChangeEvent({
-    this.isFocused,
-    this.predictions,
-    this.isLoading,
-    this.error,
+  const AutocompleteState({
+    this.isFocused = false,
+    this.predictions = const [],
+    this.isLoading = false,
+    this.exception,
   });
+
+  AutocompleteState copyWith({
+    bool isFocused,
+    List<AutocompletePrediction> predictions,
+    bool isLoading,
+    Exception exception,
+  }) {
+    return AutocompleteState(
+      isFocused: isFocused ?? this.isFocused,
+      predictions: predictions ?? this.predictions,
+      isLoading: isLoading ?? this.isLoading,
+      exception: exception ?? this.exception,
+    );
+  }
 }

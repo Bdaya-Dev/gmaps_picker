@@ -100,12 +100,12 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// Whether the map is being moved.
   bool _isMoving = false;
 
-  /// Memorizes the last autocomplete event to show and update location
-  /// autocompletion dropdown.
-  AutocompleteChangeEvent _changeEvent;
-
   /// The zoom factor of the map.
   double _zoomFactor = 15;
+
+  /// Memorizes the last autocomplete state to show and update location
+  /// autocompletion dropdown.
+  var _autocompleteState = AutocompleteState();
 
   @override
   void initState() {
@@ -153,9 +153,9 @@ class _GMapsPickerState extends State<GMapsPicker> {
     Navigator.pop(context, _locationPick);
   }
 
-  void _onAutocompleteChange(AutocompleteChangeEvent event) {
+  void _onAutocompleteChange(AutocompleteState event) {
     setState(() {
-      _changeEvent = event;
+      _autocompleteState = event;
     });
   }
 
@@ -164,7 +164,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
     return () async {
       // Hide the prediction list.
       setState(() {
-        _changeEvent = null;
+        _autocompleteState = AutocompleteState();
       });
 
       // Only get the geometry for the details, we are going to use geocoding
@@ -203,6 +203,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
         title: AutocompleteSearch(
           googleMapsApiKey: widget.googleMapsApiKey,
           options: widget.options,
+          value: _autocompleteState,
           onChange: _onAutocompleteChange,
         ),
         backgroundColor: Colors.transparent,
@@ -225,7 +226,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
               _buildCurrentLocationBar()
             ],
           ),
-          if (_changeEvent?.isFocused == true)
+          if (_autocompleteState.isFocused)
             Container(
               margin: EdgeInsets.only(top: 90, left: 20, right: 12),
               child: Material(
@@ -235,9 +236,9 @@ class _GMapsPickerState extends State<GMapsPicker> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
-                  itemCount: _changeEvent.predictions.length,
+                  itemCount: _autocompleteState.predictions.length,
                   itemBuilder: (context, index) {
-                    final prediction = _changeEvent.predictions[index];
+                    final prediction = _autocompleteState.predictions[index];
 
                     return ListTile(
                       key: Key(index.toString()),
