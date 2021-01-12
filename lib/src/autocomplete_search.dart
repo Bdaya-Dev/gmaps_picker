@@ -58,7 +58,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
   /// This is run whenever the input focus changes.
   void _onFocusChange() {
     widget.onChange(widget.value.copyWith(
-      isFocused: _focusNode.hasFocus,
+      isFocused: _focusNode.hasPrimaryFocus,
     ));
   }
 
