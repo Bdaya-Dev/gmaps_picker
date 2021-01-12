@@ -10,7 +10,7 @@ class AutocompleteSearch extends StatefulWidget {
   const AutocompleteSearch({
     Key key,
     @required this.googleMapsApiKey,
-    @required this.onPrediction,
+    @required this.onChange,
     this.options,
   }) : super(key: key);
 
@@ -20,15 +20,16 @@ class AutocompleteSearch extends StatefulWidget {
   /// Options used to configure the autocomplete search results.
   final AutocompleteOptions options;
 
-  /// The autocomplete prediction callback that passes any predictions made
-  /// as the user types in the search field.
-  final ValueChanged<List<AutocompletePrediction>> onPrediction;
+  /// This is a callback which produces an event with either loading state,
+  /// error state or has matched autocompletions.
+  final ValueChanged<AutocompleteChangeEvent> onChange;
 
   @override
   _AutocompleteSearchState createState() => _AutocompleteSearchState();
 }
 
 class _AutocompleteSearchState extends State<AutocompleteSearch> {
+  FocusNode _focusNode;
   GooglePlace _googlePlace;
   final _controller = TextEditingController();
   Timer _debounceTimer;
@@ -37,6 +38,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
   void initState() {
     super.initState();
     _googlePlace = GooglePlace(widget.googleMapsApiKey);
+    _focusNode = FocusNode();
     _controller.addListener(_onSearchChange);
   }
 
@@ -44,6 +46,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
   void dispose() {
     _controller.dispose();
     _debounceTimer?.cancel();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -56,7 +59,12 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
     _debounceTimer = Timer(Duration(seconds: 1), () async {
       final trimmed = _controller.text.trim();
       if (trimmed.isEmpty) {
-        widget.onPrediction([]);
+        widget.onChange(AutocompleteChangeEvent(
+          isFocused: true,
+          predictions: [],
+          isLoading: false,
+          error: null,
+        ));
         return;
       }
 
@@ -73,7 +81,12 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         strictbounds: widget.options?.strictbounds ?? false,
       );
 
-      widget.onPrediction(results.predictions ?? []);
+      widget.onChange(AutocompleteChangeEvent(
+        isFocused: true,
+        predictions: results?.predictions ?? [],
+        isLoading: false,
+        error: null,
+      ));
     });
   }
 
@@ -181,4 +194,26 @@ LatLon _fromLatLng(LatLng latLng) {
   }
 
   return LatLon(latLng.latitude, latLng.longitude);
+}
+
+/// A change event during an autocomplete action.
+class AutocompleteChangeEvent {
+  /// Whether the autocomplete textfield is in focus.
+  final bool isFocused;
+
+  /// The list of predictions that were matched.
+  final List<AutocompletePrediction> predictions;
+
+  /// Whether the autocomplete is currently loading to fetch new results.
+  final bool isLoading;
+
+  /// Any error that was thrown during autocompletion.
+  final Exception error;
+
+  AutocompleteChangeEvent({
+    this.isFocused,
+    this.predictions,
+    this.isLoading,
+    this.error,
+  });
 }

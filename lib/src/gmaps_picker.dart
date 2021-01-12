@@ -154,9 +154,9 @@ class _GMapsPickerState extends State<GMapsPicker> {
     Navigator.pop(context, _locationPick);
   }
 
-  void _onPredictionMade(List<AutocompletePrediction> predictions) {
+  void _onAutocompleteChange(AutocompleteChangeEvent event) {
     setState(() {
-      _matchedPredictions = predictions;
+      _matchedPredictions = event.predictions;
     });
   }
 
@@ -204,7 +204,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
         title: AutocompleteSearch(
           googleMapsApiKey: widget.googleMapsApiKey,
           options: widget.options,
-          onPrediction: _onPredictionMade,
+          onChange: _onAutocompleteChange,
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
