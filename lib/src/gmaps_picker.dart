@@ -100,10 +100,9 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// Whether the map is being moved.
   bool _isMoving = false;
 
-  /// List of matched predictions based on the search term. This list is
-  /// populated when the search field is in focus and there is locations that
-  /// match the search term.
-  List<AutocompletePrediction> _matchedPredictions = [];
+  /// Memorizes the last autocomplete event to show and update location
+  /// autocompletion dropdown.
+  AutocompleteChangeEvent _changeEvent;
 
   /// The zoom factor of the map.
   double _zoomFactor = 15;
@@ -156,7 +155,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
   void _onAutocompleteChange(AutocompleteChangeEvent event) {
     setState(() {
-      _matchedPredictions = event.predictions;
+      _changeEvent = event;
     });
   }
 
@@ -165,7 +164,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
     return () async {
       // Hide the prediction list.
       setState(() {
-        _matchedPredictions = [];
+        _changeEvent = null;
       });
 
       // Only get the geometry for the details, we are going to use geocoding
@@ -226,7 +225,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
               _buildCurrentLocationBar()
             ],
           ),
-          if (_matchedPredictions.isNotEmpty)
+          if (_changeEvent?.isFocused == true)
             Container(
               margin: EdgeInsets.only(top: 90, left: 20, right: 12),
               child: Material(
@@ -236,22 +235,21 @@ class _GMapsPickerState extends State<GMapsPicker> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   padding: EdgeInsets.zero,
-                  itemCount: _matchedPredictions.length,
-                  itemBuilder: (context, index) => ListTile(
-                    key: Key(index.toString()),
-                    title: Text(
-                      _matchedPredictions[index]
-                              .structuredFormatting
-                              .mainText ??
-                          '',
-                    ),
-                    subtitle: Text(_matchedPredictions[index]
-                            .structuredFormatting
-                            .secondaryText ??
-                        ''),
-                    visualDensity: VisualDensity.compact,
-                    onTap: _onSelection(_matchedPredictions[index]),
-                  ),
+                  itemCount: _changeEvent.predictions.length,
+                  itemBuilder: (context, index) {
+                    final prediction = _changeEvent.predictions[index];
+
+                    return ListTile(
+                      key: Key(index.toString()),
+                      title: Text(
+                        prediction.structuredFormatting.mainText ?? '',
+                      ),
+                      subtitle: Text(
+                          prediction.structuredFormatting.secondaryText ?? ''),
+                      visualDensity: VisualDensity.compact,
+                      onTap: _onSelection(prediction),
+                    );
+                  },
                 ),
               ),
             )
