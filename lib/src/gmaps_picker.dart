@@ -241,54 +241,63 @@ class _GMapsPickerState extends State<GMapsPicker> {
                 elevation: 4,
                 borderRadius: BorderRadius.circular(8),
                 clipBehavior: Clip.antiAlias,
-                child: [
-                  // Show the results if there are no error and predictions in
-                  // the list.
-                  if (_autocompleteState.exception == null &&
-                      _autocompleteState.predictions.isNotEmpty)
-                    ListView.builder(
-                      shrinkWrap: true,
-                      padding: EdgeInsets.zero,
-                      itemCount: _autocompleteState.predictions.length,
-                      itemBuilder: (context, index) {
-                        final prediction =
-                            _autocompleteState.predictions[index];
-
-                        return ListTile(
-                          key: Key(index.toString()),
-                          title: Text(
-                            prediction.structuredFormatting.mainText ?? '',
-                          ),
-                          subtitle: Text(
-                            prediction.structuredFormatting.secondaryText ?? '',
-                          ),
-                          visualDensity: VisualDensity.compact,
-                          onTap: _onSelection(prediction),
-                        );
-                      },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AnimatedOpacity(
+                      opacity: _autocompleteState.isLoading ? 1 : 0,
+                      duration: Duration(milliseconds: 100),
+                      child: LinearProgressIndicator(),
                     ),
+                    // Show the results if there are no error and predictions in
+                    // the list.
+                    if (_autocompleteState.exception == null &&
+                        _autocompleteState.predictions.isNotEmpty)
+                      ListView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: _autocompleteState.predictions.length,
+                        itemBuilder: (context, index) {
+                          final prediction =
+                              _autocompleteState.predictions[index];
 
-                  if (_autocompleteState.exception == null &&
-                      _autocompleteState.predictions.isEmpty)
-                    ListTile(
-                      title: Text(
-                        _autocompleteState.isLoading
-                            ? 'Loading...'
-                            : 'No matching address found',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey),
+                          return ListTile(
+                            key: Key(index.toString()),
+                            title: Text(
+                              prediction.structuredFormatting.mainText ?? '',
+                            ),
+                            subtitle: Text(
+                              prediction.structuredFormatting.secondaryText ??
+                                  '',
+                            ),
+                            visualDensity: VisualDensity.compact,
+                            onTap: _onSelection(prediction),
+                          );
+                        },
                       ),
-                    ),
 
-                  if (_autocompleteState.exception != null)
-                    ListTile(
-                      leading: Icon(Icons.error, color: Colors.red),
-                      title: Text(
-                        'Failed to find a matching address',
-                        style: TextStyle(color: Colors.grey),
+                    if (_autocompleteState.exception == null &&
+                        _autocompleteState.predictions.isEmpty)
+                      ListTile(
+                        title: Text(
+                          _autocompleteState.isLoading
+                              ? 'Loading...'
+                              : 'No matching address found',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey),
+                        ),
                       ),
-                    ),
-                ][0],
+
+                    if (_autocompleteState.exception != null)
+                      ListTile(
+                        leading: Icon(Icons.error, color: Colors.red),
+                        title: Text(
+                          'Failed to find a matching address',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ),
+                  ],
+                ),
               ),
             )
         ],
