@@ -233,7 +233,8 @@ class _GMapsPickerState extends State<GMapsPicker> {
               _buildCurrentLocationBar()
             ],
           ),
-          if (_autocompleteState.isFocused)
+          if (_autocompleteState.isFocused &&
+              _autocompleteState.input.isNotEmpty)
             Container(
               margin: EdgeInsets.only(top: 90, left: 20, right: 12),
               child: Material(

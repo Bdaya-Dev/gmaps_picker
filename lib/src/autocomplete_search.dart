@@ -84,6 +84,13 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
       _debounceTimer.cancel();
     }
 
+    if (!widget.value.isLoading) {
+      widget.onChange(widget.value.copyWith(
+        isLoading: true,
+        input: _controller.text.trim(),
+      ));
+    }
+
     _debounceTimer = Timer(Duration(seconds: 1), () async {
       final trimmed = _controller.text.trim();
       if (trimmed.isEmpty) {
@@ -91,6 +98,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
           predictions: [],
           isLoading: false,
           exception: null,
+          input: '',
         ));
         return;
       }
@@ -113,12 +121,14 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
           predictions: results?.predictions ?? [],
           isLoading: false,
           exception: null,
+          input: trimmed,
         ));
       } catch (exception) {
         // Pass the exception to the top.
         widget.onChange(widget.value.copyWith(
           isLoading: false,
           exception: exception,
+          input: trimmed,
         ));
 
         // Rethrow this just incase the user up in the tree may want to log it
@@ -249,10 +259,15 @@ class AutocompleteState {
   /// Any exception that was thrown during autocompletion.
   final Exception exception;
 
+  /// The search input. This field does not update as you type. The purpose of
+  /// this field is to tweak the way the results are shown based on the input.
+  final String input;
+
   const AutocompleteState({
     this.isFocused = false,
     this.predictions = const [],
     this.isLoading = false,
+    this.input = '',
     this.exception,
   });
 
@@ -260,12 +275,14 @@ class AutocompleteState {
     bool isFocused,
     List<AutocompletePrediction> predictions,
     bool isLoading,
+    String input,
     Exception exception,
   }) {
     return AutocompleteState(
       isFocused: isFocused ?? this.isFocused,
       predictions: predictions ?? this.predictions,
       isLoading: isLoading ?? this.isLoading,
+      input: input ?? this.input,
       exception: exception ?? this.exception,
     );
   }
