@@ -84,6 +84,12 @@ class GMapsPicker extends StatefulWidget {
 }
 
 class _GMapsPickerState extends State<GMapsPicker> {
+  /// Controller to manage and navigate to places on the map.
+  GoogleMapController _googleMapController;
+
+  /// GooglePlace api client.
+  GooglePlace _googlePlace;
+
   /// The location that is pointed by the marker with additional geocoded
   /// location.
   Location _locationPick;
@@ -99,10 +105,14 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// match the search term.
   List<AutocompletePrediction> _matchedPredictions = [];
 
+  /// The zoom factor of the map.
+  double _zoomFactor = 15;
+
   @override
   void initState() {
     super.initState();
 
+    _googlePlace = GooglePlace(widget.googleMapsApiKey);
     _currentMarker = LatLng(
       widget.initialLocation.latitude,
       widget.initialLocation.longitude,
@@ -148,6 +158,43 @@ class _GMapsPickerState extends State<GMapsPicker> {
     setState(() {
       _matchedPredictions = predictions;
     });
+  }
+
+  /// Callback for when a selection on the autocomplete is made.
+  VoidCallback _onSelection(AutocompletePrediction prediction) {
+    return () async {
+      // Hide the prediction list.
+      setState(() {
+        _matchedPredictions = [];
+      });
+
+      // Only get the geometry for the details, we are going to use geocoding
+      // to extract other details.
+      final details = await _googlePlace.details.get(
+        prediction.placeId,
+        fields: 'geometry',
+        sessionToken: widget.options?.sessionToken,
+      );
+
+      if (details?.result == null) {
+        // No details fetched due to failure of somekind. No error is returned
+        // by the library.
+        return;
+      }
+
+      setState(() {
+        _currentMarker = LatLng(
+          details.result.geometry.location.lat,
+          details.result.geometry.location.lng,
+        );
+      });
+
+      // Go to the selected place on the map.
+      final _ = _reverseGeocode();
+      await _googleMapController.animateCamera(
+        CameraUpdate.newLatLngZoom(_currentMarker, _zoomFactor),
+      );
+    };
   }
 
   @override
@@ -203,7 +250,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
                             .secondaryText ??
                         ''),
                     visualDensity: VisualDensity.compact,
-                    onTap: () {},
+                    onTap: _onSelection(_matchedPredictions[index]),
                   ),
                 ),
               ),
@@ -266,11 +313,14 @@ class _GMapsPickerState extends State<GMapsPicker> {
       myLocationEnabled: true,
       zoomControlsEnabled: false,
       onMapCreated: (controller) async {
+        _googleMapController = controller;
+
         // Change the map location once it is initialized.
         if (widget.onMapInitialization != null) {
           final newPos = await widget.onMapInitialization();
           setState(() {
             _currentMarker = newPos.latlng;
+            _zoomFactor = newPos.zoom ?? _zoomFactor;
           });
           final _ = _reverseGeocode();
 
