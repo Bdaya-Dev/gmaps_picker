@@ -10,6 +10,7 @@ class AutocompleteSearch extends StatefulWidget {
   const AutocompleteSearch({
     Key key,
     @required this.googleMapsApiKey,
+    @required this.onPrediction,
     this.options,
   }) : super(key: key);
 
@@ -18,6 +19,10 @@ class AutocompleteSearch extends StatefulWidget {
 
   /// Options used to configure the autocomplete search results.
   final AutocompleteOptions options;
+
+  /// The autocomplete prediction callback that passes any predictions made
+  /// as the user types in the search field.
+  final ValueChanged<List<AutocompletePrediction>> onPrediction;
 
   @override
   _AutocompleteSearchState createState() => _AutocompleteSearchState();
@@ -51,6 +56,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
     _debounceTimer = Timer(Duration(seconds: 1), () async {
       final trimmed = _controller.text.trim();
       if (trimmed.isEmpty) {
+        widget.onPrediction([]);
         return;
       }
 
@@ -66,6 +72,8 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         strictbounds: widget.options?.strictbounds,
         types: widget.options?.types,
       );
+
+      widget.onPrediction(results.predictions ?? []);
     });
   }
 

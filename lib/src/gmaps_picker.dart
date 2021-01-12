@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:gmaps_picker/src/animated_pin.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_place/google_place.dart';
 
 /// A function which returns a new marker position.
 typedef ChangeMarkerPositionCallback = Future<MarkerPosition> Function();
@@ -93,10 +94,10 @@ class _GMapsPickerState extends State<GMapsPicker> {
   /// Whether the map is being moved.
   bool _isMoving = false;
 
-  /// List of found locations based on the search term. This list is populated
-  /// when the search field is in focus and there is locations that match
-  /// the search term.
-  List<Location> _foundLocations = [];
+  /// List of matched predictions based on the search term. This list is
+  /// populated when the search field is in focus and there is locations that
+  /// match the search term.
+  List<AutocompletePrediction> _foundLocations = [];
 
   @override
   void initState() {
@@ -143,6 +144,12 @@ class _GMapsPickerState extends State<GMapsPicker> {
     Navigator.pop(context, _locationPick);
   }
 
+  void _onPredictionMade(List<AutocompletePrediction> predictions) {
+    setState(() {
+      _foundLocations = predictions;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -150,6 +157,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
         title: AutocompleteSearch(
           googleMapsApiKey: widget.googleMapsApiKey,
           options: widget.options,
+          onPrediction: _onPredictionMade,
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
