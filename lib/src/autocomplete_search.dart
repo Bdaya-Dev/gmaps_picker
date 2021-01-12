@@ -48,6 +48,22 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
   }
 
   @override
+  void didUpdateWidget(covariant AutocompleteSearch oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.value.isFocused == oldWidget.value.isFocused) {
+      return;
+    }
+
+    // Depending on whether `isFocused` value of the prop, remove or put focus.
+    if (widget.value.isFocused) {
+      _focusNode.requestFocus();
+    } else {
+      _focusNode.unfocus();
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _debounceTimer?.cancel();

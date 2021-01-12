@@ -159,6 +159,13 @@ class _GMapsPickerState extends State<GMapsPicker> {
     });
   }
 
+  /// Remove focus from the autocomplete search input.
+  void _unfocusAutocomplete() {
+    setState(() {
+      _autocompleteState = _autocompleteState.copyWith(isFocused: false);
+    });
+  }
+
   /// Callback for when a selection on the autocomplete is made.
   VoidCallback _onSelection(AutocompletePrediction prediction) {
     return () async {
@@ -288,42 +295,45 @@ class _GMapsPickerState extends State<GMapsPicker> {
   }
 
   Widget _buildCurrentLocationBar() {
-    return Material(
-      elevation: 4,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: _locationPick != null
-                    ? [
-                        Container(
-                          margin: EdgeInsets.only(right: 12),
-                          child: Text(
-                            _locationPick.formattedAddress,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+    return GestureDetector(
+      onTap: _unfocusAutocomplete,
+      child: Material(
+        elevation: 4,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _locationPick != null
+                      ? [
+                          Container(
+                            margin: EdgeInsets.only(right: 12),
+                            child: Text(
+                              _locationPick.formattedAddress,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        Text(
-                          _locationPick.placemark.country,
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ]
-                    : [],
+                          Text(
+                            _locationPick.placemark.country,
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ]
+                      : [],
+                ),
               ),
-            ),
-            ElevatedButton.icon(
-              onPressed: _locationPick != null ? _onSelectHere : null,
-              icon: Icon(
-                Icons.location_pin,
-                size: 20,
-              ),
-              label: Text('Select Here'),
-            )
-          ],
+              ElevatedButton.icon(
+                onPressed: _locationPick != null ? _onSelectHere : null,
+                icon: Icon(
+                  Icons.location_pin,
+                  size: 20,
+                ),
+                label: Text('Select Here'),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -331,6 +341,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
   Widget _buildGoogleMap(BuildContext context) {
     return GoogleMap(
+      onTap: (_) => _unfocusAutocomplete(),
       myLocationButtonEnabled: false,
       compassEnabled: false,
       mapToolbarEnabled: false,
