@@ -104,6 +104,10 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
           isLoading: false,
           exception: exception,
         ));
+
+        // Rethrow this just incase the user up in the tree may want to log it
+        // however they see fit.
+        rethrow;
       }
     });
   }
