@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:gmaps_picker/src/animated_pin.dart';
 import 'package:gmaps_picker/src/autocomplete_search.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_place/google_place.dart';
+import 'package:google_maps_webservice/places.dart';
 
 /// A function which returns a new marker position.
 typedef ChangeMarkerPositionCallback = Future<MarkerPosition> Function();
@@ -94,7 +94,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
   GoogleMapController _googleMapController;
 
   /// GooglePlace api client.
-  GooglePlace _googlePlace;
+  GoogleMapsPlaces _googlePlace;
 
   /// The location that is pointed by the marker with additional geocoded
   /// location.
@@ -117,7 +117,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
   void initState() {
     super.initState();
 
-    _googlePlace = GooglePlace(widget.googleMapsApiKey);
+    _googlePlace = GoogleMapsPlaces(apiKey: widget.googleMapsApiKey);
     _currentMarker = LatLng(
       widget.initialLocation.latitude,
       widget.initialLocation.longitude,
@@ -173,7 +173,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
   }
 
   /// Callback for when a selection on the autocomplete is made.
-  VoidCallback _onSelection(AutocompletePrediction prediction) {
+  VoidCallback _onSelection(Prediction prediction) {
     return () async {
       // Hide the prediction list.
       setState(() {
@@ -182,16 +182,15 @@ class _GMapsPickerState extends State<GMapsPicker> {
 
       // Only get the geometry for the details, we are going to use geocoding
       // to extract other details.
-      final details = await _googlePlace.details.get(
+      final details = await _googlePlace.getDetailsByPlaceId(
         prediction.placeId,
-        fields: 'geometry',
+        fields: ['geometry'],
         sessionToken: widget.options?.sessionToken,
       );
 
-      if (details?.result == null) {
-        // No details fetched due to failure of somekind. No error is returned
-        // by the library.
-        return;
+      if (!details.isOkay) {
+        // If some error occurred, throw it with a reason.
+        throw AutocompleteException(details.status, details.errorMessage);
       }
 
       setState(() {
@@ -480,6 +479,22 @@ class LocationPermissionNotProvidedException implements Exception {}
 
 /// Exception for when location permission is denied forever by the user.
 class LocationPermissionDeniedForeverException implements Exception {}
+
+/// Exception for when autocomplete fails to get results successfully.
+class AutocompleteException implements Exception {
+  const AutocompleteException(this.kind, this.reason);
+
+  final String kind;
+  final String reason;
+
+  @override
+  String toString() {
+    if (kind == null && reason == null) {
+      return 'AutocompleteException';
+    }
+    return 'AutocompleteException due to $kind: $reason';
+  }
+}
 
 /// MarkerPosition defined where the marker is located at on the map.
 class MarkerPosition {

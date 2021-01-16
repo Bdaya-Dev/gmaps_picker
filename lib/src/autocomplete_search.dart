@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:gmaps_picker/gmaps_picker.dart';
-import 'package:google_place/google_place.dart';
+import 'package:gmaps_picker/gmaps_picker.dart' hide Location;
+import 'package:google_maps_webservice/places.dart';
 
 /// Autocomplete searches for matching addresses based on the given search
 /// input.
@@ -34,14 +34,14 @@ class AutocompleteSearch extends StatefulWidget {
 
 class _AutocompleteSearchState extends State<AutocompleteSearch> {
   FocusNode _focusNode;
-  GooglePlace _googlePlace;
+  GoogleMapsPlaces _googlePlace;
   final _controller = TextEditingController();
   Timer _debounceTimer;
 
   @override
   void initState() {
     super.initState();
-    _googlePlace = GooglePlace(widget.googleMapsApiKey);
+    _googlePlace = GoogleMapsPlaces(apiKey: widget.googleMapsApiKey);
     _focusNode = FocusNode();
     _controller.addListener(_onSearchChange);
     _focusNode.addListener(_onFocusChange);
@@ -104,7 +104,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
       }
 
       try {
-        final results = await _googlePlace.autocomplete.get(
+        final results = await _googlePlace.autocomplete(
           trimmed,
           components: widget.options?.components,
           language: widget.options?.language,
@@ -114,8 +114,14 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
           radius: widget.options?.radius,
           sessionToken: widget.options?.sessionToken,
           types: widget.options?.types,
-          strictbounds: widget.options?.strictbounds ?? false,
+          strictbounds: widget.options?.strictbounds,
         );
+
+        if (!results.hasNoResults && !results.isOkay) {
+          // If the results were not okay, then throw an exception with their
+          // reason.
+          throw AutocompleteException(results.status, results.errorMessage);
+        }
 
         widget.onChange(widget.value.copyWith(
           predictions: results?.predictions ?? [],
@@ -209,7 +215,7 @@ class AutocompleteOptions {
 
   /// The types of place results to return. If no type is specified, all types
   /// will be returned.
-  final String types;
+  final List<String> types;
 
   /// A grouping of places to which you would like to restrict your results.
   /// Currently, you can use components to filter by up to 5 countries.
@@ -236,13 +242,13 @@ class AutocompleteOptions {
   });
 }
 
-/// Convert LatLng to LatLon.
-LatLon _fromLatLng(LatLng latLng) {
+/// Convert LatLng to Location.
+Location _fromLatLng(LatLng latLng) {
   if (latLng == null) {
     return null;
   }
 
-  return LatLon(latLng.latitude, latLng.longitude);
+  return Location(latLng.latitude, latLng.longitude);
 }
 
 /// A change event during an autocomplete action.
@@ -251,7 +257,7 @@ class AutocompleteState {
   final bool isFocused;
 
   /// The list of predictions that were matched.
-  final List<AutocompletePrediction> predictions;
+  final List<Prediction> predictions;
 
   /// Whether the autocomplete is currently loading to fetch new results.
   final bool isLoading;
@@ -273,7 +279,7 @@ class AutocompleteState {
 
   AutocompleteState copyWith({
     bool isFocused,
-    List<AutocompletePrediction> predictions,
+    List<Prediction> predictions,
     bool isLoading,
     String input,
     Exception exception,
