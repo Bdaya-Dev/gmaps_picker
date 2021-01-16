@@ -270,7 +270,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
             ),
             // Show the results if there are no error and predictions in
             // the list.
-            if (_autocompleteState.exception == null &&
+            if (!_autocompleteState.isError &&
                 _autocompleteState.predictions.isNotEmpty)
               ListView.builder(
                 shrinkWrap: true,
@@ -293,7 +293,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
                 },
               ),
 
-            if (_autocompleteState.exception == null &&
+            if (!_autocompleteState.isError &&
                 _autocompleteState.predictions.isEmpty)
               ListTile(
                 title: Text(
@@ -305,7 +305,7 @@ class _GMapsPickerState extends State<GMapsPicker> {
                 ),
               ),
 
-            if (_autocompleteState.exception != null)
+            if (_autocompleteState.isError)
               ListTile(
                 leading: Icon(Icons.error, color: Colors.red),
                 title: Text(

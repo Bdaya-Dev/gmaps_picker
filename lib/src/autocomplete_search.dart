@@ -97,7 +97,7 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         widget.onChange(widget.value.copyWith(
           predictions: [],
           isLoading: false,
-          exception: null,
+          isError: false,
           input: '',
         ));
         return;
@@ -129,14 +129,14 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
         widget.onChange(widget.value.copyWith(
           predictions: results?.predictions ?? [],
           isLoading: false,
-          exception: null,
+          isError: false,
           input: trimmed,
         ));
       } catch (exception) {
         // Pass the exception to the top.
         widget.onChange(widget.value.copyWith(
           isLoading: false,
-          exception: exception,
+          isError: true,
           input: trimmed,
         ));
 
@@ -265,8 +265,8 @@ class AutocompleteState {
   /// Whether the autocomplete is currently loading to fetch new results.
   final bool isLoading;
 
-  /// Any exception that was thrown during autocompletion.
-  final Exception exception;
+  /// If any exception or error was thrown.
+  final bool isError;
 
   /// The search input. This field does not update as you type. The purpose of
   /// this field is to tweak the way the results are shown based on the input.
@@ -277,7 +277,7 @@ class AutocompleteState {
     this.predictions = const [],
     this.isLoading = false,
     this.input = '',
-    this.exception,
+    this.isError = false,
   });
 
   AutocompleteState copyWith({
@@ -285,14 +285,14 @@ class AutocompleteState {
     List<Prediction> predictions,
     bool isLoading,
     String input,
-    Exception exception,
+    bool isError,
   }) {
     return AutocompleteState(
       isFocused: isFocused ?? this.isFocused,
       predictions: predictions ?? this.predictions,
       isLoading: isLoading ?? this.isLoading,
       input: input ?? this.input,
-      exception: exception ?? this.exception,
+      isError: isError ?? this.isError,
     );
   }
 }
