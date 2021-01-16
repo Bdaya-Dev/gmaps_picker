@@ -114,7 +114,10 @@ class _AutocompleteSearchState extends State<AutocompleteSearch> {
           radius: widget.options?.radius,
           sessionToken: widget.options?.sessionToken,
           types: widget.options?.types,
-          strictbounds: widget.options?.strictbounds,
+          // Putting false here fails the api with invalid_request exception.
+          strictbounds: widget.options?.strictbounds == false
+              ? null
+              : widget.options?.strictbounds,
         );
 
         if (!results.hasNoResults && !results.isOkay) {
@@ -238,7 +241,7 @@ class AutocompleteOptions {
     this.language,
     this.types,
     this.components,
-    this.strictbounds = false,
+    this.strictbounds,
   });
 }
 
