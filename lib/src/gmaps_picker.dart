@@ -33,6 +33,7 @@ class GMapsPicker extends StatefulWidget {
     @required this.googleMapsApiKey,
     this.onMapInitialization,
     this.options,
+    this.isMyLocationButtonEnabled = true,
   }) : super(key: key);
 
   /// The initial location where the map is first shown. You may use the value
@@ -50,6 +51,9 @@ class GMapsPicker extends StatefulWidget {
 
   /// Options used to configure the autocomplete search results.
   final AutocompleteOptions options;
+
+  /// Whether the button to get my current location is enabled.
+  final bool isMyLocationButtonEnabled;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -231,7 +235,8 @@ class _GMapsPickerState extends State<GMapsPicker> {
                   children: <Widget>[
                     _buildGoogleMap(context),
                     Center(child: AnimatedPin(isAnimating: _isMoving)),
-                    _buildMyLocationButton(context),
+                    if (widget.isMyLocationButtonEnabled == true)
+                      _buildMyLocationButton(context),
                   ],
                 ),
               ),
