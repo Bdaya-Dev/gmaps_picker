@@ -212,6 +212,18 @@ class _GMapsPickerState extends State<GMapsPicker> {
     };
   }
 
+  Future<void> _updateCurrentLocation(LatLng loc, double zoomFactor) async {
+    setState(() {
+      _currentMarker = loc;
+      _zoomFactor = zoomFactor ?? _zoomFactor;
+    });
+    final _ = _reverseGeocode();
+
+    await _googleMapController.animateCamera(
+      CameraUpdate.newLatLngZoom(_currentMarker, _zoomFactor),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -422,7 +434,10 @@ class _GMapsPickerState extends State<GMapsPicker> {
       top: statusBarHeight + kToolbarHeight + 16,
       right: 12,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () async {
+          final current = await GMapsPicker.getCurrentLocation();
+          await _updateCurrentLocation(current, _zoomFactor);
+        },
         child: Icon(Icons.my_location),
         style: ButtonStyle(
           minimumSize: MaterialStateProperty.all(Size.zero),
