@@ -34,6 +34,7 @@ class GMapsPicker extends StatefulWidget {
     this.onMapInitialization,
     this.options,
     this.isMyLocationButtonEnabled = true,
+    this.onMyLocationTap = _defaultMyLocationTapHandler,
   }) : super(key: key);
 
   /// The initial location where the map is first shown. You may use the value
@@ -54,6 +55,9 @@ class GMapsPicker extends StatefulWidget {
 
   /// Whether the button to get my current location is enabled.
   final bool isMyLocationButtonEnabled;
+
+  /// Callback that is invoked when my location button is tapped.
+  final ChangeMarkerPositionCallback onMyLocationTap;
 
   @override
   _GMapsPickerState createState() => _GMapsPickerState();
@@ -90,6 +94,14 @@ class GMapsPicker extends StatefulWidget {
     await GMapsPicker.getLocationPermission();
     final position = await Geolocator.getCurrentPosition();
     return LatLng(position.latitude, position.longitude);
+  }
+
+  /// Default implementation to get my location tap.
+  static Future<MarkerPosition> _defaultMyLocationTapHandler() async {
+    return MarkerPosition(
+      latlng: await GMapsPicker.getCurrentLocation(),
+      zoom: 15,
+    );
   }
 }
 
@@ -434,10 +446,12 @@ class _GMapsPickerState extends State<GMapsPicker> {
       top: statusBarHeight + kToolbarHeight + 16,
       right: 12,
       child: ElevatedButton(
-        onPressed: () async {
-          final current = await GMapsPicker.getCurrentLocation();
-          await _updateCurrentLocation(current, _zoomFactor);
-        },
+        onPressed: widget.onMyLocationTap != null
+            ? () async {
+                final markerPos = await widget.onMyLocationTap();
+                await _updateCurrentLocation(markerPos.latlng, markerPos.zoom);
+              }
+            : null,
         child: Icon(Icons.my_location),
         style: ButtonStyle(
           minimumSize: MaterialStateProperty.all(Size.zero),
