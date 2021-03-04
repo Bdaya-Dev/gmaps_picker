@@ -32,7 +32,6 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Center(
         child: ElevatedButton(
-          child: Text('Load Google Map'),
           onPressed: () async {
             final pickedLocation = await Navigator.push<Location>(
               context,
@@ -53,6 +52,7 @@ class _HomePageState extends State<HomePage> {
               print('You picked: ${pickedLocation.formattedAddress}');
             }
           },
+          child: Text('Load Google Map'),
         ),
       ),
     );

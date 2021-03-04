@@ -251,7 +251,7 @@ Location _fromLatLng(LatLng latLng) {
     return null;
   }
 
-  return Location(latLng.latitude, latLng.longitude);
+  return Location(lat: latLng.latitude, lng: latLng.longitude);
 }
 
 /// A change event during an autocomplete action.
